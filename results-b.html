@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Link B results · Highlights share</title>
+<script src="config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3f4f6; --surface:#fff; --ink:#15171c; --muted:#646a74; --faint:#9aa0a9; --rule:#e2e4e9; --track:#eff0f3;
+  --link:#c6002b; --recover:#ec8fa2; --lost:#a3a8b1;
+  --sMain:#2a2d35; --sPrev:#e89a52; --sNext:#7b68d9; --sApp:#c6002b;
+  --sticker:#2b59c3; --video:#8b919b; --profile:#cf8a0e; --igui:#13897d; --other:#c4c8cf; --otherstory:#4a4f5c;
+  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--font);font-feature-settings:"tnum" 1,"cv11" 1}
+button{font:inherit;color:inherit}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px 72px}
+.bar{position:sticky;top:0;z-index:5;background:rgba(243,244,246,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.bar .wrap{display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
+.bar h1{font-size:15px;font-weight:600;margin:0;flex:1;min-width:240px}
+.bar h1 span{color:var(--muted);font-weight:400}
+.bar a.switch{font-size:13px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule)}
+.bar a.switch:hover{color:var(--ink)}
+.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;white-space:nowrap}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.status.live i{background:#1aa260;animation:pulse 2s infinite}
+.status.err i{background:var(--link)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(26,162,96,.5)}70%{box-shadow:0 0 0 7px rgba(26,162,96,0)}100%{box-shadow:0 0 0 0 rgba(26,162,96,0)}}
+@media (prefers-reduced-motion:reduce){.status.live i{animation:none}}
+.toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.btn{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:#c4c7ce}
+.btn:focus-visible,tr:focus-visible,.sq:focus-visible{outline:2px solid var(--sticker);outline-offset:2px}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.danger{background:var(--link);color:#fff;border-color:var(--link)}
+.banner{margin:20px 0 0;padding:12px 16px;border-radius:10px;background:#fff4d6;color:#6b4e00;font-size:13px;display:none}
+.banner.show{display:block}
+.banner button{background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;color:inherit;font-weight:600}
+
+/* Hero: outcome split + people grid */
+.hero{padding:34px 0 10px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.hero h2{font-size:clamp(28px,3.3vw,40px);line-height:1.12;letter-spacing:-.025em;font-weight:600;margin:0;max-width:19ch}
+.hero h2 .n{color:var(--link)}
+.split{display:flex;height:46px;border-radius:8px;overflow:hidden;margin:22px 0 10px;background:var(--track)}
+.split div{display:flex;align-items:center;padding:0 12px;color:#fff;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;min-width:0}
+.split .first{background:var(--link)} .split .rec{background:var(--recover);color:#5b0012} .split .lost{background:var(--lost)}
+.splitlegend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.splitlegend span{display:inline-flex;gap:6px;align-items:center}
+.splitlegend i{width:10px;height:10px;border-radius:3px}
+.people{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px 20px}
+.people h3{margin:0 0 4px;font-size:14px;font-weight:600}
+.people p{margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+.waffle{display:flex;flex-wrap:wrap;gap:6px}
+.sq{width:28px;height:28px;border-radius:6px;border:0;cursor:pointer;padding:0;position:relative}
+.sq.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:16px;border-top:1px solid var(--rule)}
+.stat{padding:10px 10px 0 0}
+.stat b{display:block;font-size:20px;font-weight:600;letter-spacing:-.02em}
+.stat span{color:var(--muted);font-size:12px;line-height:1.3;display:block}
+
+/* Panels */
+.grid{display:grid;gap:20px;margin-top:20px}
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.g2w{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px 22px 20px;min-width:0}
+.panel h3{margin:0;font-size:15px;font-weight:600}
+.panel .q{font-size:11.5px;color:var(--link);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.panel .sub{margin:3px 0 16px;color:var(--muted);font-size:13px}
+.empty{color:var(--faint);font-size:13px;padding:18px 0}
+.read{margin-top:14px;padding:10px 12px;border-radius:8px;background:#f6f7f9;font-size:13px;color:var(--ink)}
+.read b{font-weight:600}
+svg text{font-family:var(--font)}
+
+/* Zone map */
+.zones{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start}
+.phone{position:relative;width:220px;aspect-ratio:375/812;border-radius:28px;overflow:hidden;background:#000;box-shadow:0 0 0 6px #1c1d21,0 0 0 7px #3a3c42}
+.phone img{width:100%;height:100%;display:block;opacity:.62}
+.phone svg{position:absolute;inset:0;width:100%;height:100%}
+.zlist{display:grid;grid-template-columns:minmax(0,1fr) 64px 62px;gap:14px 10px;align-items:center;font-size:13px}
+.zlist .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.zlist .track{height:10px;border-radius:5px;background:var(--track);overflow:hidden}
+.zlist .track i{display:block;height:100%}
+.zlist .v{text-align:right;color:var(--muted);font-size:12.5px}
+.zlist .v b{color:var(--ink)}
+.zlist small{display:block;color:var(--muted);font-size:12px}
+
+/* Misfire table */
+.mis{width:100%;border-collapse:collapse;font-size:13px}
+.mis th{text-align:left;font-weight:500;color:var(--muted);font-size:12.5px;padding:6px 8px;border-bottom:1px solid var(--ink)}
+.mis td{padding:9px 8px;border-bottom:1px solid var(--rule)}
+.mis .stack{display:flex;height:12px;border-radius:4px;overflow:hidden;background:var(--track);min-width:120px}
+.mis .stack i{display:block;height:100%}
+
+/* Swimlanes */
+.lanes{overflow-x:auto}
+.lanelegend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.lanelegend span{display:inline-flex;gap:6px;align-items:center}
+.lanelegend i{width:14px;height:8px;border-radius:2px;display:inline-block}
+.lanelegend .tk{width:2px;height:12px;background:var(--ink);border-radius:1px}
+.lanelegend .dm{width:9px;height:9px;transform:rotate(45deg);background:var(--link);border-radius:1px}
+.lane-row{cursor:pointer}
+.lane-row:hover rect.bg{fill:#f6f7f9}
+
+/* Participants table */
+.tablewrap{overflow-x:auto;margin:0 -22px;padding:0 22px}
+table.pt{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+.pt th{text-align:left;font-weight:500;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--ink);font-size:12.5px}
+.pt td{padding:9px 10px;border-bottom:1px solid var(--rule)}
+.pt tbody tr{cursor:pointer}
+.pt tbody tr:hover{background:#f7f8fa}
+.pt tbody tr.on{background:#eef2fc}
+.pill{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.pill i{width:9px;height:9px;border-radius:3px}
+.tag{font-size:11px;padding:1px 6px;border-radius:4px;background:#eceef2;color:var(--muted);margin-left:6px;font-weight:400}
+.journey{color:var(--muted)}
+.journey b{color:var(--ink);font-weight:500}
+
+dialog{border:1px solid var(--rule);border-radius:14px;padding:24px;width:min(520px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.18)}
+dialog::backdrop{background:rgba(20,22,28,.35)}
+dialog h3{margin:0 0 6px;font-size:17px}
+dialog p{margin:0 0 16px;color:var(--muted);font-size:13px}
+dialog label{display:block;font-size:13px;font-weight:500;margin:12px 0 6px}
+dialog input{width:100%;font:inherit;padding:9px 11px;border:1px solid var(--rule);border-radius:8px}
+dialog .row{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+@media (max-width:980px){.hero,.g2,.g2w,.zones{grid-template-columns:1fr}.wrap{padding:0 16px 48px}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap">
+  <h1>Link B · realistic Instagram <span>· Highlights share tap study</span></h1>
+  <a class="switch" href="results.html">Open the Link A dashboard</a>
+  <label class="toggle"><input type="checkbox" id="incTest"> Include my test sessions</label>
+  <div class="status" id="status"><i></i><span>Connecting</span></div>
+  <button class="btn" id="exportBtn">Download CSV</button>
+  <button class="btn" id="clearBtn">Clear data</button>
+  <button class="btn" id="settingsBtn">Settings</button>
+</div></div>
+
+<main class="wrap">
+  <div class="banner" id="banner">You’re looking at sample data, not real participants. <button id="bannerBtn">Connect your Google Sheet</button> to see live results.</div>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow">In real Instagram, a wrong tap leaves the story</div>
+      <h2 id="headline">Waiting for the first participant</h2>
+      <div class="split" id="split"></div>
+      <div class="splitlegend">
+        <span><i style="background:var(--link)"></i>Found it on the first try</span>
+        <span><i style="background:var(--recover)"></i>Left, came back, found it</span>
+        <span><i style="background:var(--lost)"></i>Never found it</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="sTime">–</b><span>median time to tap the link</span></div>
+        <div class="stat"><b id="sDelay">–</b><span>median wait before the first tap</span></div>
+        <div class="stat"><b id="sAway">–</b><span>median time away before coming back</span></div>
+        <div class="stat"><b id="sAB">–</b><span id="sABlab">first try in Link A, for comparison</span></div>
+      </div>
+    </div>
+    <div class="people">
+      <h3>Every participant</h3>
+      <p>One square each, colored by outcome. Click one to follow their journey below.</p>
+      <div class="waffle" id="waffle"></div>
+    </div>
+  </section>
+
+  <div class="grid g2">
+    <section class="panel">
+      <div class="q">Do they notice the link?</div>
+      <h3>Journeys through the stories</h3>
+      <p class="sub">What each participant did first, and how it ended. Band width is the number of people.</p>
+      <div id="sankey"></div>
+    </section>
+    <section class="panel">
+      <div class="q">Where do they expect to tap?</div>
+      <h3>Where the first tap landed</h3>
+      <p class="sub">Instagram’s hidden tap zones on the iHeart story. Dots are first taps, colored by how that person’s session ended.</p>
+      <div class="zones">
+        <div class="phone"><img src="assets/story-bg.jpg" alt=""><svg id="zoneSvg" viewBox="0 0 375 812" preserveAspectRatio="none" role="img" aria-label="First taps by zone"></svg></div>
+        <div class="zlist" id="zlist"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="q">Do they notice the link?</div>
+      <h3>Each session, second by second</h3>
+      <p class="sub">Which story each person was looking at over time. Ticks are taps, the red diamond is the tap on “Play on iHeartRadio”.</p>
+      <div class="lanelegend">
+        <span><i style="background:var(--sMain)"></i>iHeart story</span>
+        <span><i style="background:var(--sPrev)"></i>Previous story</span>
+        <span><i style="background:var(--sNext)"></i>Next story</span>
+        <span><i style="background:var(--sApp)"></i>In the iHeart app</span>
+        <span><span class="tk"></span>Tap</span>
+        <span><span class="dm"></span>Tapped the link</span>
+      </div>
+      <div class="lanes" id="lanes"></div>
+    </section>
+  </div>
+
+  <div class="grid g2">
+    <section class="panel">
+      <div class="q">Where do they expect to tap?</div>
+      <h3>Which spots cost people the story</h3>
+      <p class="sub">The element tapped first by people who missed the link, and what happened to them next.</p>
+      <div id="misfire"></div>
+    </section>
+    <section class="panel">
+      <div class="q">Do they notice the link?</div>
+      <h3>When in the video people tapped</h3>
+      <p class="sub">Taps on the iHeart story by video second. The shaded area is the 3-second end card that points at the link.</p>
+      <div id="vhist"></div>
+    </section>
+  </div>
+
+  <div class="grid g2">
+    <section class="panel">
+      <h3>Hesitation and outcome</h3>
+      <p class="sub">Seconds before each person’s first tap, by how their session ended. Long waits can mean they were looking for something to tap.</p>
+      <div id="hes"></div>
+    </section>
+    <section class="panel">
+      <div class="q">Does the link take them where they expect?</div>
+      <h3>After the link opened iHeart</h3>
+      <p class="sub">Time spent in the iHeart player before going back to Instagram or leaving. Short stays that end in “back” are worth checking in the recordings.</p>
+      <div id="after"></div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:20px">
+    <h3>Participants</h3>
+    <p class="sub">Session codes (HB-…) match the code on each participant’s start screen in the UserTesting recording. Click a row to highlight their journey.</p>
+    <div class="tablewrap"><table class="pt">
+      <thead><tr><th>Session</th><th>Started</th><th>Device</th><th>Outcome</th><th>Journey</th><th>Time to link</th><th>First tap after</th><th>Time in iHeart</th><th>Went back</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+</main>
+
+<dialog id="clearDlg">
+  <form method="dialog">
+    <h3>Clear all data?</h3>
+    <p>This clears Link A and Link B together. Nothing is lost: the current data is moved to “archive” tabs in your Google Sheet, which you can delete there later.</p>
+    <p id="clearMsg" style="color:var(--link);display:none"></p>
+    <div class="row"><button class="btn" value="cancel">Cancel</button><button class="btn danger" id="clearGo" value="go">Clear data</button></div>
+  </form>
+</dialog>
+<dialog id="settings">
+  <form method="dialog">
+    <h3>Connect your Google Sheet</h3>
+    <p>Paste the web app URL from Apps Script and the dashboard key you set in the script. These are saved in this browser only.</p>
+    <label for="urlIn">Web app URL</label><input id="urlIn" placeholder="https://script.google.com/macros/s/…/exec">
+    <label for="keyIn">Dashboard key</label><input id="keyIn" type="password" placeholder="The DASHBOARD_KEY from the script">
+    <div class="row"><button class="btn" value="cancel">Cancel</button><button class="btn primary" value="save">Save and connect</button></div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+  const POLL_MS = 10000, STORY_S = 20, ENDCARD_FROM = 17, LEFT_ZONE = 125;
+  const OUT = {first:{label:'First try', color:'var(--link)'}, rec:{label:'Came back, found it', color:'var(--recover)'}, lost:{label:'Never found it', color:'var(--lost)'}};
+  const NAMES = {'attribution-link':'Play on iHeartRadio','sticker-card':'Sticker card','background-video':'Video','avatar':'Avatar','username':'Username',
+    'timestamp':'Timestamp “2m”','progress-bar':'Progress bar','status-bar':'Status bar','action-activity':'Activity button','action-highlight':'Highlight button',
+    'action-send':'Send button','action-mention':'Mention button','action-more':'More button','action-bar-empty':'Bottom bar (empty)','home-indicator':'Home bar',
+    'story-empty':'Empty area','outside-phone-frame':'Outside the phone','prev-story':'Previous story','next-story':'Next story','reply-bar':'Reply bar','unknown':'Unknown'};
+  const PARTS = {'left-third':'left side','right-third':'right side','center':'center','title':'title','show-art':'show art','content-type':'“HIGHLIGHTS” label',
+    'iheart-logo':'iHeart logo','icon':'icon','text':'text','chevron':'arrow','right':'right side'};
+  const name = (el, part) => (NAMES[el] || el) + (part && el !== 'attribution-link' ? ' · ' + (PARTS[part] || part) : '');
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const median = a => { a = a.filter(x => x != null && !isNaN(x)); if (!a.length) return null; const s = [...a].sort((x,y)=>x-y), m = s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; };
+  const fmtS = ms => ms == null ? '–' : (ms/1000 < 10 ? (ms/1000).toFixed(1) : Math.round(ms/1000)) + ' s';
+  const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+  const truthy = v => v === true || v === 'TRUE' || v === 'true';
+  const device = ua => !ua ? '–' : /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Mac/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'Other';
+  const SCREEN = {'story':'main','story-prev':'prev','story-next':'next'};
+  const STORY_LABEL = {main:'iHeart story', prev:'previous story', next:'next story', app:'iHeart app'};
+
+  // ---------- Settings (shared with the Link A dashboard) ----------
+  const cfg = () => ({ url: localStorage.getItem('tapstudy.url') || (window.STUDY_CONFIG && window.STUDY_CONFIG.sheetUrl) || '', key: localStorage.getItem('tapstudy.key') || '' });
+  const dlg = document.getElementById('settings');
+  function openSettings(){ const c = cfg(); urlIn.value = c.url; keyIn.value = c.key; dlg.showModal(); }
+  document.getElementById('settingsBtn').onclick = openSettings;
+  document.getElementById('bannerBtn').onclick = openSettings;
+  dlg.addEventListener('close', () => { if (dlg.returnValue !== 'save') return;
+    localStorage.setItem('tapstudy.url', urlIn.value.trim()); localStorage.setItem('tapstudy.key', keyIn.value.trim()); lastSig = ''; poll(); });
+
+  let data = {taps:[], events:[]}, sample = false, lastSig = '', lastOk = null, selected = null;
+  const incTest = document.getElementById('incTest');
+  incTest.onchange = () => render();
+
+  // ---------- Sessions ----------
+  function buildSessions(){
+    const by = new Map();
+    const get = id => { if (!by.has(id)) by.set(id, {id, taps:[], events:[], debug:false, ua:'', started:null}); return by.get(id); };
+    data.events.forEach(e => { const s = get(e.session); s.events.push({...e, t_ms:+e.t_ms || 0});
+      if (e.type === 'story_start') { s.debug = truthy(e.debug); s.ua = e.user_agent; s.started = e.received_at; } });
+    data.taps.filter(t => String(t.screen).startsWith('story')).forEach(t => get(t.session).taps.push({...t, x:+t.x, y:+t.y, t_ms:+t.t_ms, seq:+t.seq, video_time: t.video_time === '' ? null : +t.video_time}));
+    const all = [];
+    by.forEach(s => {
+      s.taps.sort((a,b) => a.seq - b.seq); s.events.sort((a,b) => a.t_ms - b.t_ms);
+      s.mode = String(s.id).startsWith('HB-') ? 'B' : 'A';
+      s.linkIdx = s.taps.findIndex(t => t.element === 'attribution-link');
+      s.found = s.linkIdx >= 0;
+      s.firstTry = s.linkIdx === 0;
+      s.outcome = s.firstTry ? 'first' : s.found ? 'rec' : 'lost';
+      s.timeToLink = s.found ? s.taps[s.linkIdx].t_ms : null;
+      s.firstDelay = s.taps.length ? s.taps[0].t_ms : null;
+      const opened = s.events.find(e => e.type === 'app_opened');
+      s.wentBack = s.events.some(e => e.type === 'back_to_instagram');
+      if (opened) { const leave = s.events.find(e => e.t_ms > opened.t_ms && (e.type === 'back_to_instagram' || e.type === 'page_hidden')); s.appTime = leave ? leave.t_ms - opened.t_ms : null; s.appLeave = leave ? leave.type : null; }
+      else { s.appTime = null; s.appLeave = null; }
+      s.started = s.started || (s.taps[0] && s.taps[0].received_at) || null;
+      // First action: tap the link, tap the left / right zone, or let the story end
+      const ft = s.taps[0], firstNav = s.events.find(e => e.type.startsWith('nav_'));
+      if (ft && ft.element === 'attribution-link') s.firstAction = 'link';
+      else if (ft && (!firstNav || ft.t_ms <= firstNav.t_ms + 50)) s.firstAction = ft.screen === 'story' && ft.x < LEFT_ZONE ? 'prev' : 'next';
+      else if (firstNav && firstNav.type === 'nav_auto') s.firstAction = 'auto';
+      else s.firstAction = 'none';
+      s.firstWrong = !s.firstTry && ft ? ft : null;
+      s.segments = timeline(s);
+      const away = s.segments.filter(g => g.kind === 'prev' || g.kind === 'next');
+      s.awayTime = s.outcome === 'rec' && away.length ? away.reduce((a,g) => a + g.t1 - g.t0, 0) : null;
+      s.journey = s.segments.filter(g => g.kind !== 'app').map(g => g.kind).filter((k,i,a) => i === 0 || a[i-1] !== k);
+      if (!s.started && !s.taps.length) return;
+      all.push(s);
+    });
+    all.sort((a,b) => String(b.started).localeCompare(String(a.started)));
+    const base = all.filter(s => incTest.checked || !s.debug);
+    return { B: base.filter(s => s.mode === 'B'), A: base.filter(s => s.mode === 'A') };
+  }
+  // Rebuild which story was on screen over time from the navigation events
+  function timeline(s){
+    const segs = []; let cur = 'main', t = 0;
+    const push = (to, at) => { if (at > t) segs.push({kind:cur, t0:t, t1:at}); cur = to; t = at; };
+    s.events.forEach(e => {
+      if (e.type.startsWith('nav_')) {
+        const from = SCREEN[e.screen] || cur;
+        let to = from;
+        if (from === 'main') to = e.type === 'nav_prev' ? 'prev' : 'next';
+        else if (from === 'prev') to = e.type === 'nav_prev' ? 'prev' : 'main';
+        else if (from === 'next') to = e.type === 'nav_prev' ? 'main' : 'next';
+        push(to, e.t_ms);
+      } else if (e.type === 'app_opened') push('app', e.t_ms);
+      else if (e.type === 'back_to_instagram') push('main', e.t_ms);
+      else if (e.type === 'page_hidden' && cur !== 'gone') push('gone', e.t_ms);
+    });
+    const lastTap = s.taps.length ? s.taps[s.taps.length-1].t_ms : 0;
+    const lastEv = s.events.length ? s.events[s.events.length-1].t_ms : 0;
+    if (cur !== 'gone') push('gone', Math.max(t + 1500, lastTap + 1500, lastEv));
+    return segs.filter(g => g.kind !== 'gone');
+  }
+
+  // ---------- Render ----------
+  function render(){
+    const {A, B} = buildSessions(), S = B, n = S.length;
+    const by = k => S.filter(s => s.outcome === k).length;
+    const f = by('first'), r = by('rec'), l = by('lost');
+    document.getElementById('headline').innerHTML = n ? `<span class="n">${f} of ${n}</span> tapped “Play on iHeartRadio” before leaving the story` : 'Waiting for the first Link B participant';
+    document.getElementById('split').innerHTML = n ? [['first',f],['rec',r],['lost',l]].filter(x => x[1]).map(([k,v]) =>
+      `<div class="${k==='first'?'first':k==='rec'?'rec':'lost'}" style="width:${100*v/n}%" title="${OUT[k].label}: ${v}">${pct(v,n)}%</div>`).join('') : '';
+    document.getElementById('sTime').textContent = fmtS(median(S.filter(s=>s.found).map(s => s.timeToLink)));
+    document.getElementById('sDelay').textContent = fmtS(median(S.map(s => s.firstDelay)));
+    document.getElementById('sAway').textContent = fmtS(median(S.map(s => s.awayTime)));
+    document.getElementById('sAB').textContent = A.length ? pct(A.filter(s => s.firstTry).length, A.length) + '%' : '–';
+    document.getElementById('sABlab').textContent = A.length ? `first try in Link A (${A.length} people), for comparison` : 'first try in Link A, for comparison';
+    renderWaffle(S); renderSankey(S); renderZones(S); renderLanes(S); renderMisfire(S); renderVHist(S); renderHes(S); renderAfter(S); renderTable(S);
+  }
+  function select(id){ selected = selected === id ? null : id; render(); }
+
+  function renderWaffle(S){
+    const el = document.getElementById('waffle');
+    if (!S.length) { el.innerHTML = '<div class="empty">No participants yet.</div>'; return; }
+    const order = {first:0, rec:1, lost:2};
+    el.innerHTML = [...S].sort((a,b) => order[a.outcome] - order[b.outcome]).map(s =>
+      `<button class="sq ${s.id===selected?'on':''}" style="background:${OUT[s.outcome].color}" title="${esc(s.id)} · ${OUT[s.outcome].label}${s.found ? ' · ' + fmtS(s.timeToLink) : ''}" aria-label="${esc(s.id)}, ${OUT[s.outcome].label}" data-id="${esc(s.id)}"></button>`).join('');
+    el.querySelectorAll('.sq').forEach(b => b.onclick = () => select(b.dataset.id));
+  }
+
+  // Sankey: started -> first action -> outcome
+  function renderSankey(S){
+    const el = document.getElementById('sankey'), n = S.length;
+    if (!n) { el.innerHTML = '<div class="empty">No participants yet.</div>'; return; }
+    const A1 = {link:{label:'Tapped the link', color:'var(--link)'}, next:{label:'Tapped right → next story', color:'var(--sNext)'},
+      prev:{label:'Tapped left → previous story', color:'var(--sPrev)'}, auto:{label:'Let the story end', color:'var(--faint)'}, none:{label:'Didn’t tap', color:'#d5d8dd'}};
+    const W = 560, H = 300, nodeW = 12, gap = 14, X = [10, 270, W - 22];
+    const col1 = Object.keys(A1).map(k => ({k, v:S.filter(s => s.firstAction === k).length})).filter(x => x.v);
+    const col2 = ['first','rec','lost'].map(k => ({k, v:S.filter(s => s.outcome === k).length})).filter(x => x.v);
+    const unit = c => (H - gap * (c.length - 1)) / n;
+    const place = c => { let y = 0; const u = unit(c); c.forEach(x => { x.y = y; x.h = Math.max(2, x.v * u); x.out = y; x.in = y; y += x.h + gap; }); };
+    place(col1); place(col2);
+    const u0 = H / n, start = {y:0, h:H, out:0};
+    const band = (x0, y0, x1, y1, h, color) => { const xm = (x0 + x1) / 2;
+      return `<path d="M${x0},${y0} C${xm},${y0} ${xm},${y1} ${x1},${y1} L${x1},${y1+h} C${xm},${y1+h} ${xm},${y0+h} ${x0},${y0+h} Z" fill="${color}" fill-opacity=".28"/>`; };
+    let svg = '';
+    col1.forEach(c => { const h0 = c.v * u0; svg += band(X[0] + nodeW, start.out, X[1], c.in, Math.min(h0, c.h), A1[c.k].color); start.out += h0; c.in += c.h; });
+    col1.forEach(c => { const u = c.h / c.v; col2.forEach(o => { const v = S.filter(s => s.firstAction === c.k && s.outcome === o.k).length; if (!v) return;
+      const ho = v * u, hi = v * (o.h / o.v); svg += band(X[1] + nodeW, c.out, X[2], o.in, Math.min(ho, hi), OUT[o.k].color); c.out += ho; o.in += hi; }); });
+    svg += `<rect x="${X[0]}" y="0" width="${nodeW}" height="${H}" rx="3" fill="var(--sMain)"/>`;
+    svg += `<text x="${X[0] + nodeW + 8}" y="${H/2}" font-size="12.5" fill="var(--ink)" font-weight="600">Started</text><text x="${X[0] + nodeW + 8}" y="${H/2 + 16}" font-size="12" fill="var(--muted)">${n} people</text>`;
+    col1.forEach(c => { svg += `<rect x="${X[1]}" y="${c.y}" width="${nodeW}" height="${c.h}" rx="3" fill="${A1[c.k].color}"/>` +
+      `<text x="${X[1] - 8}" y="${c.y + c.h/2 + 4}" font-size="12" text-anchor="end" fill="var(--ink)">${esc(A1[c.k].label)} <tspan fill="var(--muted)">${c.v}</tspan></text>`; });
+    col2.forEach(o => { svg += `<rect x="${X[2]}" y="${o.y}" width="${nodeW}" height="${o.h}" rx="3" fill="${OUT[o.k].color}"/>` +
+      `<text x="${X[2] - 8}" y="${o.y + o.h/2 + 4}" font-size="12" text-anchor="end" fill="var(--ink)" font-weight="600">${esc(OUT[o.k].label)} <tspan fill="var(--muted)" font-weight="400">${o.v} · ${pct(o.v,n)}%</tspan></text>`; });
+    el.innerHTML = `<svg viewBox="-4 -4 ${W + 8} ${H + 8}" width="100%" role="img" aria-label="Flow from first action to outcome">${svg}</svg>`;
+    const wrong = S.filter(s => s.firstAction === 'next' || s.firstAction === 'prev'), back = wrong.filter(s => s.found).length;
+    el.insertAdjacentHTML('beforeend', `<div class="read"><b>Reading it:</b> ${wrong.length ? `of the ${wrong.length} who tapped away from the story first, ${back} (${pct(back, wrong.length)}%) came back and found the link.` : 'nobody has tapped away from the story yet.'}</div>`);
+  }
+
+  // Zone map of first taps
+  function renderZones(S){
+    const svg = document.getElementById('zoneSvg'), list = document.getElementById('zlist'), n = S.length;
+    const firsts = S.filter(s => s.taps[0] && s.taps[0].screen === 'story').map(s => ({s, t:s.taps[0]}));
+    const zoneOf = t => t.element === 'attribution-link' ? 'link' : t.y < 48 || t.y > 713 || t.element === 'outside-phone-frame' ? 'outside' : t.x < LEFT_ZONE ? 'left' : 'right';
+    let g = `<rect x="0" y="48" width="${LEFT_ZONE}" height="665" fill="var(--sPrev)" fill-opacity=".22"/>` +
+      `<rect x="${LEFT_ZONE}" y="48" width="${374 - LEFT_ZONE}" height="665" fill="var(--sNext)" fill-opacity=".18"/>` +
+      `<line x1="${LEFT_ZONE}" y1="48" x2="${LEFT_ZONE}" y2="713" stroke="#fff" stroke-dasharray="5 5" stroke-opacity=".7"/>` +
+      `<rect x="52" y="80" width="162" height="24" rx="5" fill="none" stroke="#fff" stroke-width="2"/>` +
+      `<text x="62" y="300" font-size="15" font-weight="700" fill="#fff" opacity=".85">‹ previous</text><text x="300" y="300" font-size="15" font-weight="700" fill="#fff" opacity=".85" text-anchor="middle">next ›</text>`;
+    g += firsts.map(({s,t}) => `<circle cx="${t.x}" cy="${t.y}" r="${s.id===selected?13:10}" fill="${OUT[s.outcome].color}" stroke="#fff" stroke-width="${s.id===selected?3:1.6}"/>`).join('');
+    svg.innerHTML = g;
+    if (!firsts.length) { list.innerHTML = '<div class="empty" style="grid-column:1/-1">No first taps yet.</div>'; return; }
+    const Z = [['link','“Play on iHeartRadio”','opens iHeart','var(--link)'],['right','Right side (incl. sticker, video)','skips to the next story','var(--sNext)'],
+      ['left','Left third','goes back a story','var(--sPrev)'],['outside','Outside the story','bottom bar, status bar','var(--faint)']];
+    const tot = firsts.length;
+    list.innerHTML = Z.map(([k, lab, what, c]) => { const v = firsts.filter(x => zoneOf(x.t) === k).length;
+      return `<div><span class="sw" style="background:${c}"></span>${esc(lab)}<small>${esc(what)}</small></div><div class="track"><i style="width:${100*v/tot}%;background:${c}"></i></div><div class="v"><b>${pct(v,tot)}%</b> · ${v}</div>`; }).join('');
+  }
+
+  // Swimlanes
+  function renderLanes(S){
+    const el = document.getElementById('lanes');
+    if (!S.length) { el.innerHTML = '<div class="empty">No participants yet.</div>'; return; }
+    const order = {first:0, rec:1, lost:2};
+    const rows = [...S].sort((a,b) => order[a.outcome] - order[b.outcome] || (a.timeToLink ?? 1e9) - (b.timeToLink ?? 1e9));
+    const maxMs = Math.min(120000, Math.max(30000, ...rows.flatMap(s => s.segments.map(g => g.t1))));
+    const L = 96, W = 1080, rowH = 24, top = 22, x = ms => L + (W - L - 10) * Math.min(ms, maxMs) / maxMs;
+    const COLOR = {main:'var(--sMain)', prev:'var(--sPrev)', next:'var(--sNext)', app:'var(--sApp)'};
+    let svg = '';
+    for (let t = 0; t <= maxMs/1000; t += maxMs > 60000 ? 20 : 10) svg += `<line x1="${x(t*1000)}" y1="${top-6}" x2="${x(t*1000)}" y2="${top + rows.length*rowH}" stroke="#eceef1"/><text x="${x(t*1000)}" y="${top-10}" font-size="11" fill="var(--faint)" text-anchor="middle">${t}s</text>`;
+    rows.forEach((s, i) => {
+      const y = top + i * rowH, on = s.id === selected;
+      svg += `<g class="lane-row" data-id="${esc(s.id)}"><rect class="bg" x="0" y="${y}" width="${W}" height="${rowH}" fill="${on ? '#eef2fc' : 'transparent'}"/>` +
+        `<rect x="6" y="${y + 8}" width="8" height="8" rx="2" fill="${OUT[s.outcome].color}"/><text x="20" y="${y + 16}" font-size="12" font-weight="${on?700:500}" fill="var(--ink)">${esc(s.id)}</text>`;
+      s.segments.forEach(g => { svg += `<rect x="${x(g.t0)}" y="${y + 6}" width="${Math.max(1, x(g.t1) - x(g.t0))}" height="12" rx="2" fill="${COLOR[g.kind]}"><title>${STORY_LABEL[g.kind]}: ${fmtS(g.t0)}–${fmtS(g.t1)}</title></rect>`; });
+      s.taps.forEach(t => { if (t.element === 'attribution-link') svg += `<rect x="${x(t.t_ms) - 5}" y="${y + 7}" width="10" height="10" transform="rotate(45 ${x(t.t_ms)} ${y + 12})" fill="var(--link)" stroke="#fff" stroke-width="1.5"><title>Tapped the link at ${fmtS(t.t_ms)}</title></rect>`;
+        else svg += `<rect x="${x(t.t_ms) - 1}" y="${y + 3}" width="2" height="18" rx="1" fill="#fff" stroke="var(--ink)" stroke-width=".8"><title>${esc(name(t.element, t.part))} at ${fmtS(t.t_ms)}</title></rect>`; });
+      svg += `</g>`;
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${top + rows.length*rowH + 4}" width="100%" style="min-width:760px" role="img" aria-label="Timeline of each session">${svg}</svg>`;
+    el.querySelectorAll('.lane-row').forEach(g => g.onclick = () => select(g.dataset.id));
+  }
+
+  // Which first-tap elements cost people the story
+  function renderMisfire(S){
+    const el = document.getElementById('misfire');
+    const W = S.filter(s => s.firstWrong);
+    if (!W.length) { el.innerHTML = '<div class="empty">No wrong first taps yet.</div>'; return; }
+    const m = {};
+    W.forEach(s => { const k = name(s.firstWrong.element, s.firstWrong.part); m[k] = m[k] || {n:0, rec:0, lost:0}; m[k].n++; m[k][s.outcome]++; });
+    const rows = Object.entries(m).sort((a,b) => b[1].n - a[1].n);
+    el.innerHTML = `<table class="mis"><thead><tr><th>First tap on</th><th>People</th><th>Came back · lost</th><th></th></tr></thead><tbody>` +
+      rows.map(([k,v]) => `<tr><td>${esc(k)}</td><td>${v.n}</td><td><div class="stack"><i style="width:${100*v.rec/v.n}%;background:var(--recover)"></i><i style="width:${100*v.lost/v.n}%;background:var(--lost)"></i></div></td><td style="color:var(--muted);font-size:12.5px;white-space:nowrap">${v.rec} · ${v.lost}</td></tr>`).join('') + `</tbody></table>`;
+    const top = rows[0];
+    el.insertAdjacentHTML('beforeend', `<div class="read"><b>Most common misfire:</b> ${esc(top[0])}, tapped first by ${top[1].n} ${top[1].n>1?'people':'person'}; ${top[1].lost} of them never found the link.</div>`);
+  }
+
+  // Taps by video second, link above the axis, other taps below
+  function renderVHist(S){
+    const el = document.getElementById('vhist');
+    const taps = S.flatMap(s => s.taps.filter(t => t.screen === 'story' && t.video_time != null));
+    if (!taps.length) { el.innerHTML = '<div class="empty">No taps on the iHeart story yet.</div>'; return; }
+    const up = Array(STORY_S).fill(0), dn = Array(STORY_S).fill(0);
+    taps.forEach(t => { const b = Math.min(STORY_S - 1, Math.max(0, Math.floor(t.video_time))); (t.element === 'attribution-link' ? up : dn)[b]++; });
+    const max = Math.max(1, ...up, ...dn), W = 560, H = 220, mid = 112, L = 28, bw = (W - L) / STORY_S, sc = v => 92 * v / max;
+    let svg = `<rect x="${L + ENDCARD_FROM*bw}" y="6" width="${(STORY_S - ENDCARD_FROM)*bw}" height="${H - 22}" fill="#fbe5ea"/>` +
+      `<text x="${L + ENDCARD_FROM*bw + 4}" y="20" font-size="11" fill="#8d0020" font-weight="600">end card</text>` +
+      `<line x1="${L}" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--ink)"/>` +
+      `<text x="0" y="${mid - 40}" font-size="11" fill="var(--link)" transform="rotate(-90 8 ${mid-40})" text-anchor="middle">link</text>` +
+      `<text x="0" y="${mid + 50}" font-size="11" fill="var(--muted)" transform="rotate(-90 8 ${mid+50})" text-anchor="middle">other</text>`;
+    for (let i = 0; i < STORY_S; i++) {
+      if (up[i]) svg += `<rect x="${L + i*bw + 2}" y="${mid - sc(up[i])}" width="${bw - 4}" height="${sc(up[i])}" rx="2" fill="var(--link)"><title>${i}–${i+1}s: ${up[i]} link taps</title></rect>`;
+      if (dn[i]) svg += `<rect x="${L + i*bw + 2}" y="${mid + 1}" width="${bw - 4}" height="${sc(dn[i])}" rx="2" fill="var(--video)"><title>${i}–${i+1}s: ${dn[i]} other taps</title></rect>`;
+      if (i % 5 === 0) svg += `<text x="${L + i*bw}" y="${H - 2}" font-size="11" fill="var(--faint)" text-anchor="middle">${i}s</text>`;
+    }
+    svg += `<text x="${W}" y="${H - 2}" font-size="11" fill="var(--faint)" text-anchor="end">20s</text>`;
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Taps by video second">${svg}</svg>`;
+    const linkT = up.reduce((a,b)=>a+b,0), inEnd = up.slice(ENDCARD_FROM).reduce((a,b)=>a+b,0);
+    el.insertAdjacentHTML('beforeend', `<div class="read"><b>End card:</b> ${linkT ? `${inEnd} of ${linkT} link taps (${pct(inEnd, linkT)}%) happened while the end card was showing, which covers 15% of the video.` : 'no link taps yet.'}</div>`);
+  }
+
+  // Hesitation dot plot
+  function renderHes(S){
+    const el = document.getElementById('hes');
+    const pts = S.filter(s => s.firstDelay != null);
+    if (!pts.length) { el.innerHTML = '<div class="empty">No taps yet.</div>'; return; }
+    const maxS = Math.max(10, Math.ceil(Math.max(...pts.map(s => s.firstDelay/1000)) / 5) * 5);
+    const W = 560, L = 140, rowH = 52, rows = ['first','rec','lost'], x = s => L + (W - L - 12) * Math.min(s, maxS) / maxS;
+    let svg = '';
+    for (let t = 0; t <= maxS; t += maxS > 30 ? 10 : 5) svg += `<line x1="${x(t)}" y1="6" x2="${x(t)}" y2="${rows.length*rowH}" stroke="#eceef1"/><text x="${x(t)}" y="${rows.length*rowH + 16}" font-size="11" fill="var(--faint)" text-anchor="middle">${t}s</text>`;
+    rows.forEach((k, i) => {
+      const y = i * rowH + rowH/2, grp = pts.filter(s => s.outcome === k), med = median(grp.map(s => s.firstDelay/1000));
+      svg += `<text x="0" y="${y + 4}" font-size="12.5" fill="var(--ink)">${esc(OUT[k].label)}</text>`;
+      const seen = {};
+      grp.forEach(s => { const b = Math.round(x(s.firstDelay/1000) / 8); seen[b] = (seen[b]||0) + 1; const dy = (seen[b] % 2 ? -1 : 1) * Math.floor(seen[b]/2) * 9;
+        svg += `<circle cx="${x(s.firstDelay/1000)}" cy="${y + dy}" r="${s.id===selected?8:6}" fill="${OUT[k].color}" stroke="#fff" stroke-width="1.5" style="cursor:pointer" data-id="${esc(s.id)}"><title>${esc(s.id)}: ${fmtS(s.firstDelay)}</title></circle>`; });
+      if (med != null) svg += `<line x1="${x(med)}" y1="${y - 16}" x2="${x(med)}" y2="${y + 16}" stroke="var(--ink)" stroke-width="2"/><text x="${x(med) + 5}" y="${y - 10}" font-size="11" fill="var(--muted)">median ${med.toFixed(1)}s</text>`;
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${rows.length*rowH + 22}" width="100%" role="img" aria-label="Seconds before first tap by outcome">${svg}</svg>`;
+    el.querySelectorAll('circle[data-id]').forEach(c => c.onclick = () => select(c.dataset.id));
+  }
+
+  // After the link
+  function renderAfter(S){
+    const el = document.getElementById('after');
+    const O = S.filter(s => s.found);
+    if (!O.length) { el.innerHTML = '<div class="empty">Nobody has opened iHeart yet.</div>'; return; }
+    const back = O.filter(s => s.wentBack), stay = O.length - back.length;
+    const maxS = Math.max(30, Math.ceil(Math.max(0, ...O.map(s => (s.appTime || 0)/1000)) / 10) * 10);
+    const W = 560, L = 150, x = v => L + (W - L - 12) * Math.min(v, maxS) / maxS;
+    let svg = '';
+    for (let t = 0; t <= maxS; t += maxS > 60 ? 20 : 10) svg += `<line x1="${x(t)}" y1="4" x2="${x(t)}" y2="100" stroke="#eceef1"/><text x="${x(t)}" y="116" font-size="11" fill="var(--faint)" text-anchor="middle">${t}s</text>`;
+    [['Went back to Instagram', back, 30, 'var(--sPrev)'], ['Stayed or left the page', O.filter(s => !s.wentBack), 76, 'var(--link)']].forEach(([lab, grp, y, c]) => {
+      svg += `<text x="0" y="${y + 4}" font-size="12.5" fill="var(--ink)">${lab}</text><text x="0" y="${y + 19}" font-size="11.5" fill="var(--muted)">${grp.length} people</text>`;
+      grp.filter(s => s.appTime != null).forEach((s, i) => svg += `<circle cx="${x(s.appTime/1000)}" cy="${y + (i % 3 - 1) * 7}" r="6" fill="${c}" stroke="#fff" stroke-width="1.5"><title>${esc(s.id)}: ${fmtS(s.appTime)} in iHeart</title></circle>`);
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} 122" width="100%" role="img" aria-label="Time in iHeart">${svg}</svg>`;
+    const quick = back.filter(s => s.appTime != null && s.appTime < 10000);
+    el.insertAdjacentHTML('beforeend', `<div class="read"><b>${stay} of ${O.length}</b> stayed in iHeart. ${back.length ? `${back.length} went back to Instagram, ${quick.length} of them within 10 seconds: ${quick.map(s => esc(s.id)).join(', ') || 'none'}.` : 'Nobody went back to Instagram.'}</div>`);
+  }
+
+  function renderTable(S){
+    const jr = s => s.journey.map((k, i) => i === 0 ? '' : `<b>${STORY_LABEL[k]}</b>`).filter(Boolean).join(' → ');
+    document.getElementById('rows').innerHTML = S.map(s => `<tr tabindex="0" data-id="${esc(s.id)}" class="${s.id===selected?'on':''}">
+      <td><b>${esc(s.id)}</b>${s.debug?'<span class="tag">test</span>':''}</td>
+      <td>${s.started ? new Date(s.started).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '–'}</td>
+      <td>${device(s.ua)}</td>
+      <td><span class="pill"><i style="background:${OUT[s.outcome].color}"></i>${OUT[s.outcome].label}</span></td>
+      <td class="journey">${s.journey.length > 1 ? 'iHeart story → ' + jr(s) : 'Stayed on the iHeart story'}${s.found ? ' → <b style="color:var(--link)">link</b>' : ''}</td>
+      <td>${fmtS(s.timeToLink)}</td><td>${fmtS(s.firstDelay)}</td><td>${fmtS(s.appTime)}</td><td>${s.wentBack ? 'Yes' : '–'}</td></tr>`).join('')
+      || '<tr><td colspan="9" class="empty">No participants yet.</td></tr>';
+    document.querySelectorAll('#rows tr[data-id]').forEach(tr => { tr.onclick = () => select(tr.dataset.id);
+      tr.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(tr.dataset.id); } }; });
+  }
+
+  // ---------- Download CSV (Link B, one row per participant + one row per tap) ----------
+  document.getElementById('exportBtn').onclick = () => {
+    const {B} = buildSessions();
+    const cols = ['session','test','device','started','outcome','first_action','time_to_link_s','first_tap_after_s','time_away_s','journey','time_in_iheart_s','went_back_to_instagram',
+      'tap_number','on_screen','element','part','label','x','y','time_s','video_time_s','long_press'];
+    const q = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; };
+    const sec = ms => ms == null ? '' : (ms/1000).toFixed(1);
+    const lines = [cols.join(',')];
+    B.forEach(s => {
+      const base = [s.id, s.debug, device(s.ua), s.started, OUT[s.outcome].label, s.firstAction, sec(s.timeToLink), sec(s.firstDelay), sec(s.awayTime),
+        s.journey.map(k => STORY_LABEL[k]).join(' > ') + (s.found ? ' > link' : ''), sec(s.appTime), s.wentBack];
+      if (!s.taps.length) lines.push([...base, ...Array(10).fill('')].map(q).join(','));
+      s.taps.forEach((t, i) => lines.push([...base, i + 1, t.screen, t.element, t.part, name(t.element, t.part), t.x, t.y, (t.t_ms/1000).toFixed(2), t.video_time, truthy(t.long_press)].map(q).join(',')));
+    });
+    const d = new Date(), stamp = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\n')], {type:'text/csv'}));
+    a.download = `highlights-tap-study-linkB-${stamp}${sample ? '-SAMPLE' : ''}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  // ---------- Clear ----------
+  const clearDlg = document.getElementById('clearDlg'), clearMsg = document.getElementById('clearMsg'), clearGo = document.getElementById('clearGo');
+  document.getElementById('clearBtn').onclick = () => { const c = cfg(); if (!c.url || !c.key) { openSettings(); return; }
+    clearMsg.style.display = 'none'; clearGo.disabled = false; clearGo.textContent = 'Clear data'; clearDlg.showModal(); };
+  clearGo.onclick = async (ev) => {
+    ev.preventDefault(); const c = cfg(); clearGo.disabled = true; clearGo.textContent = 'Clearing…';
+    try { const r = await fetch(`${c.url}?key=${encodeURIComponent(c.key)}&action=clear&t=${Date.now()}`); const j = await r.json();
+      if (!j.cleared) throw new Error(j.error === 'wrong_key' ? 'Wrong dashboard key.' : 'The script didn’t confirm. Update the Apps Script code to the latest version.');
+      clearDlg.close(); selected = null; lastSig = ''; data = {taps:[], events:[]}; render(); poll();
+    } catch (e) { clearMsg.textContent = 'Couldn’t clear: ' + e.message; clearMsg.style.display = 'block'; clearGo.disabled = false; clearGo.textContent = 'Try again'; }
+  };
+
+  // ---------- Live data ----------
+  const statusEl = document.getElementById('status');
+  function setStatus(kind, text){ statusEl.className = 'status ' + kind; statusEl.querySelector('span').textContent = text; }
+  async function poll(){
+    const c = cfg();
+    if (!c.url || !c.key) { if (!sample) { data = sampleData(); sample = true; render(); } document.getElementById('banner').classList.add('show'); setStatus('', 'Sample data'); return; }
+    try {
+      const r = await fetch(`${c.url}?key=${encodeURIComponent(c.key)}&t=${Date.now()}`); const j = await r.json();
+      if (j.error === 'wrong_key') { setStatus('err', 'Wrong dashboard key'); return; }
+      if (j.error) throw new Error(j.error);
+      document.getElementById('banner').classList.remove('show');
+      if (sample) { sample = false; lastSig = ''; }
+      lastOk = Date.now();
+      const sig = (j.taps||[]).length + ':' + (j.events||[]).length;
+      if (sig !== lastSig) { lastSig = sig; data = {taps: j.taps || [], events: j.events || []}; render(); }
+      setStatus('live', 'Live · updated just now');
+    } catch (e) { setStatus('err', 'Can’t reach the Sheet. Retrying'); }
+  }
+  setInterval(() => { if (lastOk && statusEl.classList.contains('live')) { const s = Math.round((Date.now() - lastOk)/1000);
+    statusEl.querySelector('span').textContent = `Live · updated ${s < 5 ? 'just now' : s + ' s ago'}`; } }, 1000);
+  setInterval(poll, POLL_MS); poll();
+
+  // ---------- Sample data (only until a Sheet is connected) ----------
+  function sampleData(){
+    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const wrong = [['sticker-card','title',190,560],['sticker-card','show-art',64,557],['background-video','center',190,360],['background-video','right-third',320,330],
+      ['background-video','left-third',55,330],['avatar','',28,80],['username','',85,72],['sticker-card','iheart-logo',318,548]];
+    const W = [6,2,4,3,2,1,1,2], pickW = () => { let r = rnd() * W.reduce((a,b)=>a+b), i = 0; while ((r -= W[i]) > 0) i++; return wrong[i]; };
+    const taps = [], events = [], now = Date.now();
+    const ev = (o) => events.push(o);
+    for (let p = 0; p < 16; p++) {
+      const id = 'HB-' + (1200 + Math.floor(rnd()*8000)) + String.fromCharCode(65 + Math.floor(rnd()*26));
+      const at = new Date(now - (16 - p) * 33 * 60000).toISOString(); let seq = 0;
+      ev({session:id, type:'story_start', t_ms:0, user_agent: rnd() > .15 ? 'iPhone' : 'Android', debug:false, received_at:at});
+      let t = 1200 + rnd()*5000;
+      const tap = (screen, el, part, x, y, vt) => taps.push({session:id, seq:++seq, screen, element:el, part, x:x + (rnd()-.5)*24, y:y + (rnd()-.5)*20, t_ms:Math.round(t), video_time: vt, received_at:at});
+      const r = rnd(); let found = false;
+      if (r < .33) { if (rnd() < .4) t = 17200 + rnd()*2500; tap('story','attribution-link','text',120,93, +(t/1000).toFixed(2)); found = true; }
+      else if (r < .4) { t = 20000; ev({session:id, type:'nav_auto', screen:'story', t_ms:t, received_at:at}); t += 2000 + rnd()*2000;
+        tap('story-next','next-story','left-third',50,420,null); ev({session:id, type:'nav_prev', screen:'story-next', t_ms:Math.round(t), received_at:at});
+        t += 3000 + rnd()*6000; if (rnd() > .4) { tap('story','attribution-link','text',120,93, +((t - 25000)/1000).toFixed(2)); found = true; } }
+      else {
+        const w = pickW(); const dir = w[2] < LEFT_ZONE ? 'prev' : 'next';
+        tap('story', w[0], w[1], w[2], w[3], +(t/1000).toFixed(2)); ev({session:id, type: dir === 'prev' ? 'nav_prev' : 'nav_next', screen:'story', t_ms:Math.round(t), received_at:at});
+        const t0 = t; t += 1500 + rnd()*3000;
+        if (rnd() < .6) {
+          tap('story-' + dir, dir + '-story', dir === 'next' ? 'left-third' : 'right', dir === 'next' ? 50 : 300, 420, null);
+          ev({session:id, type: dir === 'next' ? 'nav_prev' : 'nav_next', screen:'story-' + dir, t_ms:Math.round(t), received_at:at});
+          const back = t; t += 2000 + rnd()*7000;
+          if (rnd() < .3) { const w2 = pickW(); tap('story', w2[0], w2[1], w2[2], w2[3], +((t - back)/1000).toFixed(2)); }
+          else { tap('story','attribution-link','text',120,93, +((t - back)/1000).toFixed(2)); found = true; }
+        } else if (dir === 'prev' && rnd() < .5) { t = t0 + 5000; ev({session:id, type:'nav_auto', screen:'story-prev', t_ms:Math.round(t), received_at:at}); t += 3000 + rnd()*5000;
+          tap('story','attribution-link','text',120,93, +((t - t0 - 5000)/1000).toFixed(2)); found = true; }
+        else { tap('story-' + dir, dir + '-story', 'right', 300, 420, null); ev({session:id, type:'nav_next', screen:'story-' + dir, t_ms:Math.round(t), received_at:at}); }
+      }
+      if (found) { ev({session:id, type:'link_tapped', t_ms:Math.round(t), received_at:at}); ev({session:id, type:'app_opened', t_ms:Math.round(t + 1950), received_at:at});
+        const stay = rnd() > .3 ? 20000 + rnd()*50000 : 2500 + rnd()*12000;
+        ev({session:id, type: stay < 15000 ? 'back_to_instagram' : 'page_hidden', t_ms:Math.round(t + 1950 + stay), received_at:at}); }
+      else ev({session:id, type:'page_hidden', t_ms:Math.round(t + 4000), received_at:at});
+    }
+    for (let p = 0; p < 12; p++) { const id = 'HA-' + (1000 + p); ev({session:id, type:'story_start', t_ms:0, debug:false, received_at:new Date(now).toISOString()});
+      taps.push({session:id, seq:1, screen:'story', element: rnd() < .4 ? 'attribution-link' : 'sticker-card', part:'', x:150, y:300, t_ms:3000}); }
+    return {taps, events};
+  }
+})();
+</script>
+</body>
+</html>

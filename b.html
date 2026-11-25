@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Story</title>
+<script>window.STUDY_MODE = "B";</script>
+<script src="config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--sf:-apple-system,"SF Pro Text",BlinkMacSystemFont,Inter,"Helvetica Neue",Arial,sans-serif;--inter:Inter,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+img{display:block;-webkit-user-drag:none}
+p{margin:0}
+
+/* Device canvas: the Figma frame is 375 x 812; it is scaled to fit the screen */
+#stage{position:fixed;left:0;right:0;bottom:0;top:var(--bar,56px);display:flex;align-items:center;justify-content:center}
+#backBar{position:fixed;left:0;right:0;top:0;height:var(--bar,56px);display:flex;align-items:center;padding:0 max(12px,env(safe-area-inset-left));z-index:12}
+#backBtn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;border-radius:18px;border:1px solid rgba(255,255,255,.22);background:#2a2b30;color:#fff;font:600 14px/1 var(--inter);cursor:pointer;opacity:0;visibility:hidden;transform:translateX(-6px);transition:opacity .25s,transform .25s,visibility .25s}
+#backBtn.show{opacity:1;visibility:visible;transform:none}
+#backBtn svg{width:18px;height:18px}
+#backBtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#device{position:relative;width:375px;height:812px;flex:none;overflow:hidden;transform-origin:center center;background:#0d1014}
+.screen{position:absolute;inset:0;overflow:hidden}
+
+/* ---------- Instagram story (Figma 19812:107191) ---------- */
+#story{background:#0d1014}
+.statusbar{position:absolute;left:0;top:0;width:375px;height:44px}
+.story{position:absolute;left:0;top:48px;width:374px;height:665px;border-radius:10px;overflow:hidden;background:#000}
+.story video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.progress{position:absolute;left:6px;top:8px;display:flex;gap:4px}
+.progress i{display:block;height:2px;width:179px;border-radius:1px}
+.progress .done{background:#fff}
+.progress .track{background:rgba(255,255,255,.35)}
+.progress .fill{position:absolute;left:183px;top:0;height:2px;width:0;border-radius:1px;background:#fff}
+.topgrad{position:absolute;left:0;top:11px;width:375px;height:81px;background:linear-gradient(-0.09deg,rgba(0,0,0,0) 0.368%,rgba(0,0,0,.52) 12.394%,#000 99.644%);pointer-events:none}
+.header{position:absolute;left:12px;top:17px;display:flex;gap:10px;align-items:center}
+.header .avatar{width:34px;height:33px}
+.header .col{display:flex;flex-direction:column;gap:2px;width:154px}
+.header .row1{display:flex;gap:29px;align-items:center;font-family:var(--inter);font-size:14.5px;letter-spacing:-.145px;line-height:normal;white-space:nowrap}
+.header .user{font-weight:600;color:#fff}
+.header .time{font-weight:400;color:rgba(255,255,255,.7)}
+.attr{position:relative;display:flex;gap:6px;align-items:center;width:100%;cursor:pointer}
+.attr::before{content:"";position:absolute;left:-4px;right:-4px;top:-5px;bottom:-5px}
+.attr > *{position:relative}
+.attr .ic{width:14px;height:10.6px}
+.attr .txt{font-family:var(--inter);font-weight:500;font-size:13px;letter-spacing:-.13px;line-height:16px;color:#fff;white-space:nowrap}
+.attr .chev{width:8px;height:13px}
+.sticker{position:absolute;left:24px;top:482px;width:328px;display:flex;gap:12px;align-items:center;padding:12px 14px 12px 12px;border-radius:16px;background:#fff;overflow:hidden}
+.sticker .art{width:56px;height:56px;border-radius:10px;overflow:hidden;flex:none}
+.sticker .art img{width:100%;height:100%;object-fit:cover}
+.sticker .meta{display:flex;flex-direction:column;gap:2px;overflow:hidden;flex:none}
+.sticker .lab{display:flex;gap:6px;align-items:center}
+.sticker .type{width:180px;font-family:var(--sf);font-size:11.186px;line-height:13px;color:#6b6b70;white-space:nowrap}
+.sticker .type b{color:#c6002b;font-weight:700}
+.sticker .logo{width:46px;height:10.415px}
+.sticker .logo img{width:47px;height:11px;margin-left:-.05px}
+.sticker .title{width:234px;font-family:var(--sf);font-weight:600;font-size:14px;line-height:17px;color:#000;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+.actions{position:absolute;left:0;top:720px;width:375px;height:70px;overflow:hidden}
+.actions .act{position:absolute;top:0;width:60px;height:56px;cursor:default}
+.actions .act img{position:absolute;top:4px;left:17px;width:26px;height:26px}
+.actions .act span{position:absolute;top:36px;left:50%;transform:translateX(-50%);width:80px;text-align:center;font-family:var(--inter);font-size:12px;letter-spacing:-.12px;line-height:15px;color:#fff}
+.homeind{position:absolute;left:120.5px;top:797px;width:134px;height:5px;border-radius:3px;background:#fff}
+
+/* ---------- Link B: stories before and after (realistic Instagram) ---------- */
+.story.alt{display:none}
+.story.alt.on{display:block}
+#storyMain.off{display:none}
+.alt .bgfill{position:absolute;inset:0}
+.alt .words{position:absolute;left:28px;right:28px;top:50%;transform:translateY(-50%);text-align:center;color:#fff;font-family:var(--inter);font-weight:800;font-size:30px;line-height:1.15;letter-spacing:-.6px;text-shadow:0 2px 12px rgba(0,0,0,.18)}
+.alt .words small{display:block;font-weight:600;font-size:17px;letter-spacing:-.2px;margin-top:14px;opacity:.92}
+.alt .words .emoji{display:block;font-size:56px;margin-bottom:12px}
+.alt .bars{position:absolute;left:6px;top:8px;right:6px;display:flex;gap:4px}
+.alt .bars i{position:relative;display:block;height:2px;flex:1;border-radius:1px;background:rgba(255,255,255,.35);overflow:hidden}
+.alt .bars i b{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
+.alt .bars i.done b{width:100%}
+.alt .ahead{position:absolute;left:12px;top:17px;display:flex;gap:10px;align-items:center;font-family:var(--inter);font-size:14.5px;letter-spacing:-.145px;white-space:nowrap}
+.alt .ahead .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.alt .ahead .u{font-weight:600;color:#fff}
+.alt .ahead .tm{color:rgba(255,255,255,.7);margin-left:19px}
+.alt .topgrad{top:0;height:110px;background:linear-gradient(to bottom,rgba(0,0,0,.38),rgba(0,0,0,0))}
+.replybar{position:absolute;left:0;top:720px;width:375px;height:70px;display:none;align-items:flex-start;gap:16px;padding:4px 14px 0}
+.replybar .msg{flex:1;height:44px;border:1px solid rgba(255,255,255,.55);border-radius:22px;display:flex;align-items:center;padding:0 18px;color:rgba(255,255,255,.85);font:400 15px var(--inter)}
+.replybar svg,.replybar img{width:26px;height:26px;margin-top:9px}
+#story.friend .actions{display:none}
+#story.friend .replybar{display:flex}
+
+/* ---------- iHeart app: Land on iHeart Mobile (Figma 19812:107338) ---------- */
+#app{background:#000;visibility:hidden}
+#app video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.botgrad{position:absolute;left:0;top:550px;width:375px;height:262px;background:linear-gradient(180deg,rgba(0,0,0,0) 1.5%,rgba(0,0,0,.25) 12.352%,rgba(0,0,0,.45) 21.586%,rgba(0,0,0,.6) 35.553%,#000 60.167%);pointer-events:none}
+.bottom{position:absolute;left:0;bottom:13px;width:375px;padding:16px;display:flex;flex-direction:column;gap:22px;align-items:flex-start}
+.bottom .top{display:flex;justify-content:space-between;align-items:flex-end;width:100%}
+.metadata{display:flex;flex-direction:column;gap:16px;width:295px;height:112px}
+.mrow{display:flex;gap:8px;align-items:center;height:64px;align-self:flex-start}
+.tile{width:48px;height:48px;border-radius:6px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);flex:none}
+.tile img{width:100%;height:100%;object-fit:cover}
+.mcol{display:flex;flex-direction:column;gap:4px;width:231px}
+.mname{display:flex;gap:8px;align-items:center}
+.mname .show{font-family:var(--sf);font-weight:600;font-size:12px;line-height:16px;letter-spacing:-.35px;color:#fff;white-space:nowrap}
+.mname .follow{width:89px;height:28px}
+.mtitle{font-family:var(--sf);font-size:12px;line-height:16px;letter-spacing:-.35px;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.desc{font-family:var(--sf);font-size:12px;line-height:16px;letter-spacing:-.35px;color:#fff;width:100%;height:32px;overflow:hidden}
+.desc .dim{color:rgba(255,255,255,.7)}
+.desc b{color:rgba(255,255,255,.7);font-weight:700}
+.side{display:flex;flex-direction:column;width:44px}
+.side div{padding:10px;display:flex;align-items:center;justify-content:center}
+.side img{width:24px;height:24px}
+.aprog{position:relative;width:343px;height:3px;border-radius:1.5px;background:#fff}
+.aprog i{position:absolute;left:0;top:0;height:3px;width:2%;border-radius:1.5px;background:#c6002b}
+.fullep{width:343px;height:36px}
+.fullep img{width:343px;height:36px}
+.apphead{position:absolute;left:0;top:0;width:375px;height:88px}
+.apphead img{width:375px;height:88px}
+.apphead .back{position:absolute;left:10px;top:52px;width:36px;height:28px}
+.apphead .title{position:absolute;left:120px;top:52px;width:135px;height:28px}
+.homebar{position:absolute;left:calc(50% - .5px);transform:translateX(-50%);bottom:8px;width:136px;height:5px;border-radius:6px;background:#fff}
+
+/* ---------- Start screen ---------- */
+#start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;color:#fff;font-family:var(--inter);text-align:center;padding:24px;cursor:pointer}
+#start .big{font-size:22px;font-weight:600;letter-spacing:-.3px}
+#start .small{font-size:15px;color:rgba(255,255,255,.7)}
+#start .code{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.2px}
+
+/* ---------- iHeart splash: Opening iHeartRadio (Figma 19692:104874) ---------- */
+#splash{background:#c6002b;visibility:hidden;border-radius:0}
+#splash .slogo{position:absolute;left:107.5px;top:387.89px;width:160px;height:36.226px}
+#splash .slogo img{width:160.2px;height:36.226px;margin-left:-.18px}
+#splash .homebar{left:119.5px;transform:none;bottom:auto;top:799px}
+
+/* ---------- Instagram -> iHeart launch sequence ---------- */
+.attr.pressed{opacity:.5}
+#story.backgrounded{transition:transform .5s cubic-bezier(.32,.72,0,1),filter .5s;transform:scale(.92);filter:brightness(.55)}
+#splash.launching{visibility:visible;animation:launch .5s cubic-bezier(.32,.72,0,1) both}
+@keyframes launch{from{transform:scale(.06);border-radius:120px;opacity:.4}60%{opacity:1}to{transform:scale(1);border-radius:0;opacity:1}}
+#splash.done{visibility:visible;animation:fadeOut .32s ease both}
+@keyframes fadeOut{to{opacity:0}}
+#app.entering{visibility:visible;animation:appIn .32s ease both}
+@keyframes appIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#story.backgrounded{transition:none}#splash.launching,#splash.done,#app.entering{animation-duration:.01s}}
+
+/* ---------- Researcher panel: only with #debug in the URL ---------- */
+#dbgToggle{display:none;position:fixed;right:8px;bottom:8px;z-index:31;font:600 12px var(--inter);background:#2c2c33;color:#fff;border:1px solid #555;border-radius:14px;padding:6px 10px;opacity:.85}
+body.debug #dbgToggle{display:block}
+#dbg{display:none;position:fixed;right:0;top:0;bottom:0;width:min(420px,100vw);z-index:30;background:rgba(18,18,22,.96);color:#e8e8ea;font:12px/1.4 ui-monospace,Menlo,monospace;flex-direction:column}
+body.debug.dbgopen #dbg{display:flex}
+@media (max-width:899px){#dbg{top:auto;height:50vh}}
+#dbg header{padding:10px 12px;border-bottom:1px solid #333;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#dbg header b{font:600 13px/1.3 var(--inter);flex:1 0 100%}
+#dbg button{font:500 12px var(--inter);background:#2c2c33;color:#fff;border:1px solid #444;border-radius:6px;padding:5px 9px;cursor:pointer}
+#dbg .sum{padding:8px 12px;border-bottom:1px solid #333;white-space:pre-wrap}
+#dbg ol{margin:0;padding:8px 12px 8px 36px;overflow:auto;flex:1}
+#dbg li.hit{color:#7ee2a0}
+#dbg .hide{position:absolute;top:8px;right:8px}
+#dots{position:absolute;inset:0;pointer-events:none;z-index:15}
+#dots span{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:rgba(255,60,60,.55);border:2px solid #fff}
+body:not(.debug) #dots{display:none}
+</style>
+</head>
+<body>
+<div id="start" role="button" aria-label="Tap to start">
+  <div class="big">Tap to start</div>
+  <div class="small">Turn your sound on</div>
+  <div class="code">Session <span id="startCode"></span></div>
+</div>
+
+<div id="backBar"><button id="backBtn" type="button" aria-label="Back to Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Back to Instagram</button></div>
+<div id="stage">
+<div id="device">
+
+  <!-- Instagram story -->
+  <section id="story" class="screen" data-el="story-empty">
+    <img class="statusbar" src="assets/statusbar.svg" alt="" data-el="status-bar">
+    <div class="story" id="storyMain" data-el="background-video">
+      <video id="storyVideo" src="assets/story.mp4" playsinline webkit-playsinline loop preload="auto"></video>
+      <div class="progress" data-el="progress-bar"><i class="done"></i><i class="track"></i><i class="fill" id="storyFill"></i></div>
+      <div class="topgrad"></div>
+      <div class="header">
+        <img class="avatar" src="assets/avatar.svg" alt="" data-el="avatar">
+        <div class="col">
+          <div class="row1"><p class="user" data-el="username">HelloTester</p><p class="time" data-el="timestamp">2m</p></div>
+          <div class="attr" id="attrLink" data-el="attribution-link">
+            <img class="ic" src="assets/iheart-icon.svg" alt="" data-part="icon">
+            <p class="txt" data-part="text">Play on iHeartRadio</p>
+            <img class="chev" src="assets/chevron.svg" alt="" data-part="chevron">
+          </div>
+        </div>
+      </div>
+      <div class="sticker" data-el="sticker-card">
+        <div class="art" data-part="show-art"><img src="assets/showart.jpg" alt=""></div>
+        <div class="meta">
+          <div class="lab"><p class="type" data-part="content-type"><b>HIGHLIGHTS</b> · 2 min 22 sec</p><div class="logo" data-part="iheart-logo"><img src="assets/iheart-logo.svg" alt=""></div></div>
+          <p class="title" data-part="title">Busta Rhymes Gets His First Grammy Nominations in 20 Years</p>
+        </div>
+      </div>
+    </div>
+    <!-- Link B only: HelloTester's earlier story (1 of 2) -->
+    <div class="story alt" id="storyPrev" data-el="prev-story">
+      <div class="bgfill" style="background:linear-gradient(160deg,#f6a35b 0%,#ec6f66 45%,#b84a8c 100%)"></div>
+      <div class="words"><span class="emoji">☕️</span>sunday reset<small>slow morning, good playlist</small></div>
+      <div class="topgrad"></div>
+      <div class="bars"><i><b id="prevFill"></b></i><i></i></div>
+      <div class="ahead"><img src="assets/avatar.svg" alt="" style="width:34px;height:33px"><span class="u">HelloTester</span><span class="tm">1h</span></div>
+    </div>
+    <!-- Link B only: the next account's story -->
+    <div class="story alt" id="storyNext" data-el="next-story">
+      <div class="bgfill" style="background:linear-gradient(200deg,#5f6df6 0%,#7a49c9 50%,#2b1d5e 100%)"></div>
+      <div class="words"><span class="emoji">🌧️</span>rainy day plans<small>movie marathon, who’s in?</small></div>
+      <div class="topgrad"></div>
+      <div class="bars"><i><b id="nextFill"></b></i></div>
+      <div class="ahead"><span class="av" style="background:#2f9e7a">N</span><span class="u">nina.lee</span><span class="tm">4h</span></div>
+    </div>
+    <div class="replybar" data-el="reply-bar"><div class="msg" data-part="send-message">Send message</div>
+      <svg data-part="like" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/></svg>
+      <img data-part="send" src="assets/send.svg" alt=""></div>
+    <div class="actions" data-el="action-bar-empty">
+      <div class="act" style="left:7px" data-el="action-activity"><img src="assets/activity.svg" alt=""><span>Activity</span></div>
+      <div class="act" style="left:137px" data-el="action-highlight"><img src="assets/highlight.svg" alt=""><span>Highlight</span></div>
+      <div class="act" style="left:193px" data-el="action-send"><img src="assets/send.svg" alt=""><span>Send</span></div>
+      <div class="act" style="left:249px" data-el="action-mention"><img src="assets/mention.svg" alt=""><span>Mention</span></div>
+      <div class="act" style="left:304px" data-el="action-more"><img src="assets/more.svg" alt=""><span>More</span></div>
+    </div>
+    <div class="homeind" data-el="home-indicator"></div>
+  </section>
+
+  <!-- iHeart splash screen -->
+  <section id="splash" class="screen" data-el="splash">
+    <img class="statusbar" src="assets/statusbar.svg" alt="">
+    <div class="slogo"><img src="assets/kf-logo.svg" alt=""></div>
+    <div class="homebar"></div>
+  </section>
+
+  <!-- iHeart app: full screen player -->
+  <section id="app" class="screen" data-el="app-video">
+    <video id="appVideo" src="assets/app.mp4" playsinline webkit-playsinline preload="metadata"></video>
+    <div class="botgrad"></div>
+    <div class="bottom">
+      <div class="top">
+        <div class="metadata">
+          <div class="mrow">
+            <div class="tile" data-el="app-show-art"><img src="assets/showart.jpg" alt=""></div>
+            <div class="mcol">
+              <div class="mname"><p class="show" data-el="app-show-name">The Breakfast Club</p><img class="follow" src="assets/follow.svg" alt="" data-el="app-follow"></div>
+              <p class="mtitle" data-el="app-clip-title">Busta Rhymes gets His First Grammy Nominations in 20 Years</p>
+            </div>
+          </div>
+          <p class="desc" data-el="app-description">Today • 2 min 22 sec <span class="dim">The hosts celebrate Jill Scott’s five Grammy nominations and praise her intima ... </span><b data-el="app-more">More</b></p>
+        </div>
+        <div class="side">
+          <div data-el="app-like"><img src="assets/thumb.svg" alt=""></div>
+          <div data-el="app-volume"><img src="assets/volume.svg" alt=""></div>
+          <div data-el="app-pause"><img src="assets/pause.svg" alt=""></div>
+          <div data-el="app-share"><img src="assets/share.svg" alt=""></div>
+        </div>
+      </div>
+      <div class="aprog" data-el="app-progress"><i id="appFill"></i></div>
+      <div class="fullep" data-el="app-full-episode"><img src="assets/full-episode.svg" alt=""></div>
+    </div>
+    <div class="topgrad" style="top:0"></div>
+    <div class="apphead"><img src="assets/app-header.svg" alt=""><div class="back" data-el="app-back"></div><div class="title" data-el="app-header-title"></div></div>
+    <div class="homebar" data-el="app-home-bar"></div>
+  </section>
+
+  <div id="dots"></div>
+</div>
+</div>
+
+<button id="dbgToggle">Researcher view</button>
+<aside id="dbg" aria-label="Researcher panel">
+  <header><b>Researcher view · session <span id="dbgCode"></span></b>
+    <button id="dlTaps">Download taps CSV</button><button id="dlSum">Download summary CSV</button><button id="restart">New session</button>
+  </header>
+  <div class="sum" id="dbgSum"></div>
+  <ol id="dbgList"></ol>
+</aside>
+
+<script>
+(() => {
+  // ---------- Config ----------
+  const SHEET_URL = (window.STUDY_CONFIG && window.STUDY_CONFIG.sheetUrl) || "";
+  const CLIP_TOTAL_SEC = 142; // full highlight length (2 min 22 sec) for the app progress bar
+  const LONG_PRESS_MS = 500;
+
+  // ---------- Layout: scale the 375x812 frame to fit ----------
+  const device = document.getElementById('device');
+  let scale = 1;
+  function fit(){
+    const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 56;
+    const w = window.innerWidth, h = window.innerHeight - bar;
+    scale = Math.min(w/375, h/812);
+    device.style.transform = `scale(${scale})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  // ---------- Session ----------
+  const MODE = (window.STUDY_MODE === 'B' || /(^|\/)b(\.html)?$/i.test(location.pathname) || /\bB\b/.test(location.hash)) ? 'B' : 'A';
+  const debug = /debug/i.test(location.hash);
+  if (debug) { document.body.classList.add('debug'); if (innerWidth >= 900) document.body.classList.add('dbgopen'); }
+  document.getElementById('dbgToggle').addEventListener('click', () => document.body.classList.toggle('dbgopen'));
+  const code = (MODE === 'B' ? 'HB-' : 'HA-') + Math.floor(1000 + Math.random()*9000) + String.fromCharCode(65 + Math.floor(Math.random()*26));
+  const session = {
+    code, startedAt: null, ua: navigator.userAgent,
+    viewport: `${innerWidth}x${innerHeight}@${devicePixelRatio}`,
+    taps: [], events: [], screen: 'start', appOpenedAt: null
+  };
+  document.getElementById('startCode').textContent = code;
+  const t0 = () => session.startedAt ? Math.round(performance.now() - session.startedAt) : 0;
+
+  const storyV = document.getElementById('storyVideo');
+  const appV = document.getElementById('appVideo');
+  let loops = 0, lastT = 0;
+
+  function logEvent(type, extra={}){
+    const e = {session: code, type, t_ms: t0(), screen: session.screen, ...extra};
+    session.events.push(e); send([e]); render();
+  }
+
+  // ---------- Start ----------
+  const start = document.getElementById('start');
+  start.addEventListener('click', () => {
+    storyV.play().catch(() => { storyV.muted = true; storyV.play().catch(()=>{}); logEvent('autoplay_muted'); });
+    start.remove();
+    session.startedAt = performance.now();
+    session.screen = 'story';
+    appV.preload = 'auto';
+    // Unlock sound for the app video inside this tap, so it can start later without another tap
+    { const p = appV.play(); appV.pause(); if (p) p.catch(() => {}); }
+    logEvent('story_start', {viewport: session.viewport, user_agent: session.ua, debug: debug});
+    if (MODE === 'B') storyV.loop = false;
+  }, {once:true});
+
+  // ---------- Story playback ----------
+  const fill = document.getElementById('storyFill');
+  storyV.addEventListener('timeupdate', () => {
+    const t = storyV.currentTime;
+    if (MODE === 'A' && t + 0.5 < lastT) { loops++; logEvent('story_loop', {loop: loops}); }
+    lastT = t;
+  });
+  (function tick(){
+    if (storyV.duration) fill.style.width = (179 * storyV.currentTime / storyV.duration) + 'px';
+    if (appV.duration) document.getElementById('appFill').style.width = Math.max(2, 100 * appV.currentTime / CLIP_TOTAL_SEC) + '%';
+    requestAnimationFrame(tick);
+  })();
+
+  // ---------- Open the app from the attribution link ----------
+  const attr = document.getElementById('attrLink');
+  const SPLASH_HOLD_MS = 1300;   // how long the iHeart splash stays on screen
+  const backBtn = document.getElementById('backBtn');
+  let hideTimer = null;
+  backBtn.addEventListener('click', () => {
+    if (session.screen !== 'app') return;
+    clearTimeout(hideTimer);
+    const storyEl = document.getElementById('story'), splash = document.getElementById('splash'), app = document.getElementById('app');
+    appV.pause();
+    app.classList.remove('entering'); app.style.visibility = '';
+    splash.classList.remove('launching', 'done'); splash.style.visibility = '';
+    storyEl.style.visibility = '';
+    storyEl.classList.remove('backgrounded');
+    backBtn.classList.remove('show');
+    session.screen = 'story';
+    current = 'main';
+    storyV.play().catch(() => {});
+    logEvent('back_to_instagram');
+  });
+  attr.addEventListener('click', () => {
+    if (session.screen !== 'story') return;
+    const storyEl = document.getElementById('story');
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
+    session.screen = 'opening';
+    logEvent('link_tapped');
+    // Re-unlock inside this tap as a fallback
+    { const p = appV.play(); appV.pause(); if (p) p.catch(() => {}); }
+
+    // 1. Pressed state on the link
+    attr.classList.add('pressed');
+    setTimeout(() => {
+      // 2. Instagram goes to the background, iHeart launches from the link
+      attr.classList.remove('pressed');
+      storyV.pause();
+      const r = attr.getBoundingClientRect(), d = device.getBoundingClientRect();
+      const ox = ((r.left + r.width/2) - d.left) / scale, oy = ((r.top + r.height/2) - d.top) / scale;
+      splash.style.transformOrigin = `${ox}px ${oy}px`;
+      storyEl.classList.add('backgrounded');
+      splash.classList.add('launching');
+      session.screen = 'splash';
+      logEvent('splash_shown');
+
+      // 3. Splash holds, then the full screen player fades in and starts playing
+      setTimeout(() => {
+        appV.currentTime = 0;
+        appV.muted = false;
+        appV.play().catch(() => { appV.muted = true; appV.play().catch(()=>{}); logEvent('app_autoplay_muted'); });
+        app.classList.add('entering');
+        splash.classList.remove('launching'); splash.classList.add('done');
+        session.screen = 'app';
+        session.appOpenedAt = t0();
+        logEvent('app_opened');
+        backBtn.classList.add('show');
+        hideTimer = setTimeout(() => { storyEl.style.visibility = 'hidden'; splash.style.visibility = 'hidden'; }, 400);
+      }, 500 + SPLASH_HOLD_MS);
+    }, 140);
+  });
+
+  // ---------- Link B: realistic Instagram navigation ----------
+  // Left third of a story goes back, anywhere else goes forward, press-and-hold pauses,
+  // and a story moves on by itself when it ends. Link A keeps "nothing happens".
+  const IMG_STORY_MS = 5000;
+  const mainEl = document.getElementById('storyMain'), prevEl = document.getElementById('storyPrev'), nextEl = document.getElementById('storyNext');
+  const altFill = {prev: document.getElementById('prevFill'), next: document.getElementById('nextFill')};
+  let current = 'main', altStart = 0, altElapsed = 0, altPaused = false, altDone = false, holdTimer = null, held = false, suppressClick = false;
+  const screenOf = w => w === 'main' ? 'story' : 'story-' + w;
+
+  function show(which){
+    current = which;
+    mainEl.classList.toggle('off', which !== 'main');
+    prevEl.classList.toggle('on', which === 'prev');
+    nextEl.classList.toggle('on', which === 'next');
+    document.getElementById('story').classList.toggle('friend', which === 'next');
+    session.screen = screenOf(which);
+    if (which === 'main') { storyV.currentTime = 0; storyV.play().catch(()=>{}); }
+    else { storyV.pause(); altElapsed = 0; altStart = performance.now(); altPaused = false; altDone = false; }
+  }
+  function navigate(dir, how){
+    const from = current;
+    let to = from;
+    if (from === 'main') to = dir === 'back' ? 'prev' : 'next';
+    else if (from === 'prev') to = dir === 'back' ? 'prev' : 'main';
+    else if (from === 'next') to = dir === 'back' ? 'main' : 'next';
+    logEvent(how === 'auto' ? 'nav_auto' : (dir === 'back' ? 'nav_prev' : 'nav_next'));
+    if (to === 'next' && from === 'next') return;          // last story: nothing further
+    show(to);
+  }
+  (function altTick(){
+    if (MODE === 'B' && session.startedAt && current !== 'main' && session.screen.startsWith('story')) {
+      const el = altPaused ? altElapsed : altElapsed + (performance.now() - altStart);
+      const f = Math.min(1, el / IMG_STORY_MS);
+      altFill[current].style.width = (100 * f) + '%';
+      if (f >= 1 && !altDone) { altDone = true; if (current === 'prev') navigate('forward', 'auto'); }
+    }
+    requestAnimationFrame(altTick);
+  })();
+  storyV.addEventListener('ended', () => { if (MODE === 'B' && current === 'main' && session.screen === 'story') navigate('forward', 'auto'); });
+
+  if (MODE === 'B') {
+    const storyScreen = document.getElementById('story');
+    const inCard = t => t.closest('.story') && !t.closest('#attrLink');
+    storyScreen.addEventListener('pointerdown', ev => {
+      if (!session.screen.startsWith('story') || !inCard(ev.target)) return;
+      held = false;
+      holdTimer = setTimeout(() => {
+        held = true;
+        if (current === 'main') storyV.pause();
+        else if (!altPaused) { altElapsed += performance.now() - altStart; altPaused = true; }
+      }, 220);
+    });
+    const release = () => {
+      clearTimeout(holdTimer);
+      if (!held) return;
+      held = false; suppressClick = true;
+      if (current === 'main') storyV.play().catch(()=>{});
+      else { altStart = performance.now(); altPaused = false; }
+      logEvent('long_press_pause');
+    };
+    storyScreen.addEventListener('pointerup', release);
+    storyScreen.addEventListener('pointercancel', release);
+    storyScreen.addEventListener('click', ev => {
+      if (suppressClick) { suppressClick = false; return; }
+      if (!session.screen.startsWith('story') || !inCard(ev.target)) return;
+      const r = device.getBoundingClientRect();
+      const x = (ev.clientX - r.left) / scale;
+      navigate(x < 125 ? 'back' : 'forward', 'tap');
+    });
+  }
+
+  // ---------- Tap logging ----------
+  const presses = new Map();
+  function toDevice(ev){
+    const r = device.getBoundingClientRect();
+    return { x: +((ev.clientX - r.left)/scale).toFixed(1), y: +((ev.clientY - r.top)/scale).toFixed(1),
+             inside: ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom };
+  }
+  function classify(ev, p){
+    if (!p.inside) return {element: 'outside-phone-frame', part: ''};
+    const target = document.elementFromPoint(ev.clientX, ev.clientY) || ev.target;
+    const elNode = target.closest('[data-el]');
+    const partNode = target.closest('[data-part]');
+    let element = elNode ? elNode.dataset.el : 'unknown';
+    let part = partNode && elNode && elNode.contains(partNode) ? partNode.dataset.part : '';
+    if (element === 'prev-story' || element === 'next-story') part = p.x < 125 ? 'left-third' : 'right';
+    if (element === 'background-video') {
+      // Split the story into thirds: Instagram uses left/right edges to go back/forward
+      part = p.x < 125 ? 'left-third' : (p.x > 250 ? 'right-third' : 'center');
+    }
+    return {element, part};
+  }
+
+  addEventListener('pointerdown', ev => {
+    if (!session.startedAt || !session.screen.startsWith('story') || ev.target.closest('#dbg, #dbgToggle, #backBar')) return;
+    const p = toDevice(ev);
+    const c = classify(ev, p);
+    const tap = {
+      session: code, seq: session.taps.length + 1, screen: session.screen,
+      element: c.element, part: c.part, x: p.x, y: p.y,
+      t_ms: t0(), video_time: +(session.screen === 'app' ? appV.currentTime : storyV.currentTime).toFixed(2),
+      story_loop: loops, pointer: ev.pointerType, press_ms: null, long_press: null
+    };
+    session.taps.push(tap);
+    presses.set(ev.pointerId, {tap, at: performance.now()});
+    addDot(p);
+    render();
+  }, true);
+
+  function endPress(ev){
+    const pr = presses.get(ev.pointerId); if (!pr) return;
+    presses.delete(ev.pointerId);
+    pr.tap.press_ms = Math.round(performance.now() - pr.at);
+    pr.tap.long_press = pr.tap.press_ms >= LONG_PRESS_MS;
+    send([pr.tap]); render();
+  }
+  addEventListener('pointerup', endPress, true);
+  addEventListener('pointercancel', endPress, true);
+  addEventListener('contextmenu', e => e.preventDefault());
+  addEventListener('visibilitychange', () => { if (session.startedAt) logEvent(document.hidden ? 'page_hidden' : 'page_visible'); });
+
+  // ---------- Summary ----------
+  function summary(){
+    const st = session.taps.filter(t => t.screen === 'story');
+    const idx = st.findIndex(t => t.element === 'attribution-link');
+    const fmt = t => t ? (t.element + (t.part ? ':' + t.part : '')) : '';
+    return {
+      session: code,
+      first_tap: fmt(st[0]), second_tap: fmt(st[1]), third_tap: fmt(st[2]),
+      found_attribution_link: idx >= 0,
+      taps_before_link: idx >= 0 ? idx : st.length,
+      time_to_link_ms: idx >= 0 ? st[idx].t_ms : '',
+      story_loops_before_link: idx >= 0 ? st[idx].story_loop : loops,
+      total_story_taps: st.length,
+      total_app_taps: session.taps.filter(t => t.screen === 'app').length,
+      taps_during_launch: session.taps.filter(t => t.screen === 'splash' || t.screen === 'opening').length,
+      app_opened_at_ms: session.appOpenedAt ?? '',
+      viewport: session.viewport
+    };
+  }
+
+  // ---------- Sending (Google Sheet, added at publish time) ----------
+  const queue = [];
+  function send(rows){
+    if (!SHEET_URL) return;
+    queue.push(...rows);
+    flush();
+  }
+  let flushing = false;
+  async function flush(){
+    if (flushing || !queue.length) return;
+    flushing = true;
+    const batch = queue.splice(0, queue.length);
+    try {
+      await fetch(SHEET_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({rows: batch, summary: summary()})});
+    } catch(e) { queue.unshift(...batch); setTimeout(()=>{flushing=false;flush();}, 3000); return; }
+    flushing = false; if (queue.length) flush();
+  }
+  addEventListener('pagehide', () => {
+    if (!SHEET_URL) return;
+    navigator.sendBeacon && navigator.sendBeacon(SHEET_URL, JSON.stringify({rows: queue.splice(0), summary: summary()}));
+  });
+
+  // ---------- Researcher panel ----------
+  const dots = document.getElementById('dots');
+  function addDot(p){ if (!debug || !p.inside) return; const s = document.createElement('span'); s.style.left = p.x+'px'; s.style.top = p.y+'px'; dots.appendChild(s); }
+  document.getElementById('dbgCode').textContent = code;
+  function render(){
+    if (!debug) return;
+    const s = summary();
+    document.getElementById('dbgSum').textContent =
+      `First: ${s.first_tap || '—'}\nSecond: ${s.second_tap || '—'}\nThird: ${s.third_tap || '—'}\n` +
+      `Found link: ${s.found_attribution_link ? 'yes, after ' + s.taps_before_link + ' other taps, ' + (s.time_to_link_ms/1000).toFixed(1) + ' s' : 'not yet'}\n` +
+      `Story loops: ${loops} · Story taps: ${s.total_story_taps} · App taps: ${s.total_app_taps}`;
+    document.getElementById('dbgList').innerHTML = session.taps.map(t =>
+      `<li class="${t.element==='attribution-link'?'hit':''}">${t.screen} · ${t.element}${t.part?':'+t.part:''} · (${t.x}, ${t.y}) · ${(t.t_ms/1000).toFixed(1)}s${t.long_press?' · long press':''}</li>`).join('');
+  }
+  function csv(rows){
+    if (!rows.length) return '';
+    const cols = Object.keys(rows[0]);
+    const esc = v => { v = v === null || v === undefined ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; };
+    return [cols.join(','), ...rows.map(r => cols.map(c => esc(r[c])).join(','))].join('\n');
+  }
+  function download(name, text){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], {type:'text/csv'}));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  }
+  document.getElementById('dlTaps').onclick = () => download(`${code}-taps.csv`, csv(session.taps));
+  document.getElementById('dlSum').onclick = () => download(`${code}-summary.csv`, csv([summary()]));
+  document.getElementById('restart').onclick = () => location.reload();
+  render();
+})();
+</script>
+</body>
+</html>
