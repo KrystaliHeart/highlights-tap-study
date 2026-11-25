@@ -19,16 +19,15 @@ img{display:block;-webkit-user-drag:none}
 p{margin:0}
 
 /* Device canvas: the Figma frame is 375 x 812; it is scaled to fit the screen */
-#stage{position:fixed;left:var(--task,0px);right:0;bottom:0;top:var(--bar,56px);display:flex;align-items:center;justify-content:center}
-#backBar{position:fixed;left:var(--task,0px);right:0;top:0;height:var(--bar,56px);display:flex;align-items:center;padding:0 max(12px,env(safe-area-inset-left));z-index:12}
+#stage{position:fixed;left:0;right:0;bottom:0;top:var(--bar,56px);display:flex;align-items:center;justify-content:center}
+#backBar{position:fixed;left:0;right:0;top:0;height:var(--bar,56px);display:flex;align-items:center;padding:0 max(12px,env(safe-area-inset-left));z-index:12}
 #backBtn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;border-radius:18px;border:1px solid rgba(255,255,255,.22);background:#2a2b30;color:#fff;font:600 14px/1 var(--inter);cursor:pointer;opacity:0;visibility:hidden;transform:translateX(-6px);transition:opacity .25s,transform .25s,visibility .25s}
 #backBtn.show{opacity:1;visibility:visible;transform:none}
 #backBtn svg{width:18px;height:18px}
 #backBtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 
-/* ---------- Task prompt: left of the phone on wide screens, on the start screen + a Task button on phones ---------- */
-body.taskside{--task:340px}
-#task{display:none;position:fixed;left:0;top:0;bottom:0;width:var(--task);padding:40px 32px;background:#16171b;border-right:1px solid rgba(255,255,255,.1);color:#fff;font-family:var(--inter);overflow:auto;z-index:11;flex-direction:column;justify-content:center}
+/* ---------- Task prompt: a card just left of the phone on wide screens (placed by fit()), on the start screen + a Task button on phones ---------- */
+#task{display:none;position:fixed;width:320px;max-height:calc(100vh - 96px);transform:translateY(-50%);padding:24px 26px 12px;background:#16171b;border:1px solid rgba(255,255,255,.12);border-radius:18px;color:#fff;font-family:var(--inter);overflow:auto;z-index:11;flex-direction:column}
 body.taskside #task{display:flex}
 .tasklab{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:12px}
 .tasktext p{font-size:17px;line-height:1.5;margin:0 0 14px;color:#fff}
@@ -314,15 +313,25 @@ body:not(.debug) #dots{display:none}
     '<p class="dim">Please think out loud about your thought process.</p>' +
     '<p class="dim">When you think you are done, close the link and go back to the task in UserTesting.</p>';
   document.querySelectorAll('[data-task]').forEach(el => el.innerHTML = TASK_HTML);
-  const SIDE_MIN_W = 760; // wide enough for the task panel next to the phone
+  const SIDE_MIN_W = 760;          // wide enough for the task card next to the phone
+  const TASK_W = 320, TASK_GAP = 40; // task card width and its gap to the phone
+  const taskCard = document.getElementById('task');
 
   function fit(){
-    document.body.classList.toggle('taskside', window.innerWidth >= SIDE_MIN_W);
+    const side = window.innerWidth >= SIDE_MIN_W;
+    document.body.classList.toggle('taskside', side);
     const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 56;
-    const task = document.body.classList.contains('taskside') ? (parseFloat(getComputedStyle(document.body).getPropertyValue('--task')) || 0) : 0;
-    const w = window.innerWidth - task, h = window.innerHeight - bar;
+    const W = window.innerWidth, h = window.innerHeight - bar;
+    const w = side ? W - TASK_W - TASK_GAP - 48 : W;
     scale = Math.min(w/375, h/812);
-    device.style.transform = `scale(${scale})`;
+    if (side) {
+      // Center the task card + phone as one group; the card sits TASK_GAP px left of the phone
+      const phoneW = 375 * scale, groupLeft = (W - (TASK_W + TASK_GAP + phoneW)) / 2;
+      const shift = groupLeft + TASK_W + TASK_GAP + phoneW / 2 - W / 2;
+      device.style.transform = `translateX(${shift}px) scale(${scale})`;
+      taskCard.style.left = groupLeft + 'px';
+      taskCard.style.top = (bar + h / 2) + 'px';
+    } else device.style.transform = `scale(${scale})`;
   }
   addEventListener('resize', fit); fit();
 

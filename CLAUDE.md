@@ -41,8 +41,8 @@ The page picks its mode from `window.STUDY_MODE`, a path ending in `b` / `b.html
 4. In the app, a "‹ Back to Instagram" button sits **outside** the phone frame, top left, and returns
    to the iHeart story. The page reserves a 56 px strip above the phone for it.
 - **Task prompt** (`TASK_HTML` in `index.html`, one string used everywhere): shown on the start screen,
-  and, on screens at least 760 px wide (`SIDE_MIN_W`), in a 340 px panel to the left of the phone for
-  the whole session (the phone shifts right and scales into the remaining space). On narrower screens a
+  and, on screens at least 760 px wide (`SIDE_MIN_W`), in a 320 px card 40 px to the left of the phone (card + phone centered together) for
+  the whole session. On narrower screens a
   "Task" button in the top strip reopens it as a sheet (logs a `task_opened` event). Taps on the task
   panel, sheet and top strip are not logged.
 - Taps are logged **only on Instagram story screens** (`story`, `story-prev`, `story-next`), not on
