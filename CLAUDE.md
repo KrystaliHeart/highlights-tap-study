@@ -108,11 +108,18 @@ prototype → Google Apps Script web app → Google Sheet "Highlights_Share_Tap 
   ("[External] Genuin x iHeart – Highlights").
 
 ## Publishing
-- Participant links are hosted on **Netlify** (iHeart's GitHub org only allows private repos, so
-  GitHub Pages can't serve public links). Link A: `https://<site>.netlify.app/`,
-  Link B: `https://<site>.netlify.app/b.html`, dashboards at `/results.html` and `/results-b.html`.
-  Keep the same Netlify site so links in UserTesting don't change.
-- Source of truth: `iheartradio/UXD` repo, folder `prototypes/highlights-tap-study`.
+- Participant links are hosted on **GitHub Pages** from the personal public repo
+  `KrystaliHeart/highlights-tap-study` (this folder is that repo's checkout, branch `main`).
+  iHeart's GitHub org only allows private repos, so Pages can't serve public links from there.
+  Link A: `https://krystaliheart.github.io/highlights-tap-study/`, Link B: `…/b.html`,
+  dashboards at `…/results.html` and `…/results-b.html`. Pages rebuilds about a minute after a push.
+- **While the project is running, push every change to the personal repo only** (commit in this
+  folder, `git push` to `origin`). Do **not** push to `iheartradio/UXD` along the way.
+- **When the project is finished**, copy the final folder into `iheartradio/UXD`
+  (`~/UXD`, folder `prototypes/highlights-tap-study`) and update the pull request there
+  (branch `add-highlights-tap-study`, PR #98, needs an approving review before it can merge).
+  Only do this when the user says the project is done.
+- Older Netlify links (`https://<site>.netlify.app/…`) may still exist from before the move.
 
 ## Before pushing or deploying, check
 - `b.html` regenerated from `index.html`.
