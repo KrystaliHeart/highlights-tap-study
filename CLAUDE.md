@@ -40,6 +40,11 @@ The page picks its mode from `window.STUDY_MODE`, a path ending in `b` / `b.html
    full screen player (Figma 19812:107338) fades in and plays the highlight with sound.
 4. In the app, a "‹ Back to Instagram" button sits **outside** the phone frame, top left, and returns
    to the iHeart story. The page reserves a 56 px strip above the phone for it.
+- **Task prompt** (`TASK_HTML` in `index.html`, one string used everywhere): shown on the start screen,
+  and, on screens at least 760 px wide (`SIDE_MIN_W`), in a 340 px panel to the left of the phone for
+  the whole session (the phone shifts right and scales into the remaining space). On narrower screens a
+  "Task" button in the top strip reopens it as a sheet (logs a `task_opened` event). Taps on the task
+  panel, sheet and top strip are not logged.
 - Taps are logged **only on Instagram story screens** (`story`, `story-prev`, `story-next`), not on
   the splash or player.
 - The whole UI is a 375×812 frame scaled to fit the screen; all tap x/y are in that frame's coordinates.
@@ -76,7 +81,7 @@ prototype → Google Apps Script web app → Google Sheet "Highlights_Share_Tap 
 `session, type, t_ms, screen, loop, debug, viewport, user_agent, received_at`
 - Types: `story_start` (carries debug, viewport, user_agent), `story_loop` (Link A only),
   `link_tapped`, `splash_shown`, `app_opened`, `back_to_instagram`, `page_hidden`, `page_visible`,
-  `autoplay_muted`, `app_autoplay_muted`, Link B: `nav_next`, `nav_prev`, `nav_auto`
+  `autoplay_muted`, `app_autoplay_muted`, `task_opened` (phone-size screens), Link B: `nav_next`, `nav_prev`, `nav_auto`
   (screen = the story it left), `long_press_pause`.
 - Sessions opened with `#debug` in the URL have `debug=true` and are hidden in the dashboards
   unless "Include my test sessions" is ticked. `#debug` also shows a researcher panel on the test page.

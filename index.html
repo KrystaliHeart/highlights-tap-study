@@ -18,12 +18,27 @@ img{display:block;-webkit-user-drag:none}
 p{margin:0}
 
 /* Device canvas: the Figma frame is 375 x 812; it is scaled to fit the screen */
-#stage{position:fixed;left:0;right:0;bottom:0;top:var(--bar,56px);display:flex;align-items:center;justify-content:center}
-#backBar{position:fixed;left:0;right:0;top:0;height:var(--bar,56px);display:flex;align-items:center;padding:0 max(12px,env(safe-area-inset-left));z-index:12}
+#stage{position:fixed;left:var(--task,0px);right:0;bottom:0;top:var(--bar,56px);display:flex;align-items:center;justify-content:center}
+#backBar{position:fixed;left:var(--task,0px);right:0;top:0;height:var(--bar,56px);display:flex;align-items:center;padding:0 max(12px,env(safe-area-inset-left));z-index:12}
 #backBtn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;border-radius:18px;border:1px solid rgba(255,255,255,.22);background:#2a2b30;color:#fff;font:600 14px/1 var(--inter);cursor:pointer;opacity:0;visibility:hidden;transform:translateX(-6px);transition:opacity .25s,transform .25s,visibility .25s}
 #backBtn.show{opacity:1;visibility:visible;transform:none}
 #backBtn svg{width:18px;height:18px}
 #backBtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* ---------- Task prompt: left of the phone on wide screens, on the start screen + a Task button on phones ---------- */
+body.taskside{--task:340px}
+#task{display:none;position:fixed;left:0;top:0;bottom:0;width:var(--task);padding:40px 32px;background:#16171b;border-right:1px solid rgba(255,255,255,.1);color:#fff;font-family:var(--inter);overflow:auto;z-index:11;flex-direction:column;justify-content:center}
+body.taskside #task{display:flex}
+.tasklab{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:12px}
+.tasktext p{font-size:17px;line-height:1.5;margin:0 0 14px;color:#fff}
+.tasktext p.dim{font-size:15px;color:rgba(255,255,255,.72)}
+#taskBtn{display:none;margin-left:auto;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:16px;border:1px solid rgba(255,255,255,.22);background:#2a2b30;color:#fff;font:600 13px/1 var(--inter);cursor:pointer}
+body.started:not(.taskside) #taskBtn{display:inline-flex}
+#taskSheet{display:none;position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.72);align-items:flex-end;justify-content:center;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+#taskSheet.open{display:flex}
+#taskSheet .card{background:#1d1e23;border-radius:18px;padding:22px 20px 18px;max-width:440px;width:100%;font-family:var(--inter)}
+#taskSheet .tasktext p{font-size:16px}
+#taskClose{width:100%;height:44px;border-radius:12px;border:0;background:#fff;color:#000;font:600 15px var(--inter);cursor:pointer;margin-top:4px}
 #device{position:relative;width:375px;height:812px;flex:none;overflow:hidden;transform-origin:center center;background:#0d1014}
 .screen{position:absolute;inset:0;overflow:hidden}
 
@@ -121,7 +136,9 @@ p{margin:0}
 .homebar{position:absolute;left:calc(50% - .5px);transform:translateX(-50%);bottom:8px;width:136px;height:5px;border-radius:6px;background:#fff}
 
 /* ---------- Start screen ---------- */
-#start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;color:#fff;font-family:var(--inter);text-align:center;padding:24px;cursor:pointer}
+#start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;color:#fff;font-family:var(--inter);text-align:center;padding:24px 24px 56px;cursor:pointer;overflow:auto}
+#start .starttask{max-width:440px;text-align:left;background:#16171b;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:18px 20px 6px;margin-bottom:18px}
+#start .starttask .tasktext p{font-size:16px}
 #start .big{font-size:22px;font-weight:600;letter-spacing:-.3px}
 #start .small{font-size:15px;color:rgba(255,255,255,.7)}
 #start .code{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.2px}
@@ -163,12 +180,15 @@ body:not(.debug) #dots{display:none}
 </head>
 <body>
 <div id="start" role="button" aria-label="Tap to start">
+  <div class="starttask"><div class="tasklab">Your task</div><div class="tasktext" data-task></div></div>
   <div class="big">Tap to start</div>
   <div class="small">Turn your sound on</div>
   <div class="code">Session <span id="startCode"></span></div>
 </div>
 
-<div id="backBar"><button id="backBtn" type="button" aria-label="Back to Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Back to Instagram</button></div>
+<div id="backBar"><button id="backBtn" type="button" aria-label="Back to Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Back to Instagram</button><button id="taskBtn" type="button" aria-haspopup="dialog">Task</button></div>
+<aside id="task" aria-label="Your task"><div class="tasklab">Your task</div><div class="tasktext" data-task></div></aside>
+<div id="taskSheet" role="dialog" aria-modal="true" aria-label="Your task"><div class="card"><div class="tasklab">Your task</div><div class="tasktext" data-task></div><button id="taskClose" type="button">Back to the story</button></div></div>
 <div id="stage">
 <div id="device">
 
@@ -288,9 +308,18 @@ body:not(.debug) #dots{display:none}
   // ---------- Layout: scale the 375x812 frame to fit ----------
   const device = document.getElementById('device');
   let scale = 1;
+  // ---------- Task prompt (same text on the side panel, start screen and the phone Task sheet) ----------
+  const TASK_HTML = '<p>Imagine you’re tapping through Instagram Stories and see this story from someone you follow. You want to keep watching this after the Instagram Story ends. Show us what you would do.</p>' +
+    '<p class="dim">Please think out loud about your thought process.</p>' +
+    '<p class="dim">When you think you are done, close the link and go back to the task in UserTesting.</p>';
+  document.querySelectorAll('[data-task]').forEach(el => el.innerHTML = TASK_HTML);
+  const SIDE_MIN_W = 760; // wide enough for the task panel next to the phone
+
   function fit(){
+    document.body.classList.toggle('taskside', window.innerWidth >= SIDE_MIN_W);
     const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 56;
-    const w = window.innerWidth, h = window.innerHeight - bar;
+    const task = document.body.classList.contains('taskside') ? (parseFloat(getComputedStyle(document.body).getPropertyValue('--task')) || 0) : 0;
+    const w = window.innerWidth - task, h = window.innerHeight - bar;
     scale = Math.min(w/375, h/812);
     device.style.transform = `scale(${scale})`;
   }
@@ -324,6 +353,7 @@ body:not(.debug) #dots{display:none}
   start.addEventListener('click', () => {
     storyV.play().catch(() => { storyV.muted = true; storyV.play().catch(()=>{}); logEvent('autoplay_muted'); });
     start.remove();
+    document.body.classList.add('started');
     session.startedAt = performance.now();
     session.screen = 'story';
     appV.preload = 'auto';
@@ -332,6 +362,11 @@ body:not(.debug) #dots{display:none}
     logEvent('story_start', {viewport: session.viewport, user_agent: session.ua, debug: debug});
     if (MODE === 'B') storyV.loop = false;
   }, {once:true});
+
+  // Phone-size screens: the Task button reopens the task as a sheet
+  const taskSheet = document.getElementById('taskSheet');
+  document.getElementById('taskBtn').addEventListener('click', () => { taskSheet.classList.add('open'); logEvent('task_opened'); });
+  document.getElementById('taskClose').addEventListener('click', () => taskSheet.classList.remove('open'));
 
   // ---------- Story playback ----------
   const fill = document.getElementById('storyFill');
@@ -500,7 +535,7 @@ body:not(.debug) #dots{display:none}
   }
 
   addEventListener('pointerdown', ev => {
-    if (!session.startedAt || !session.screen.startsWith('story') || ev.target.closest('#dbg, #dbgToggle, #backBar')) return;
+    if (!session.startedAt || !session.screen.startsWith('story') || ev.target.closest('#dbg, #dbgToggle, #backBar, #task, #taskSheet')) return;
     const p = toDevice(ev);
     const c = classify(ev, p);
     const tap = {
