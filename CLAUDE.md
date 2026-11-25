@@ -82,18 +82,30 @@ prototype → Google Apps Script web app → Google Sheet "Highlights_Share_Tap 
   unless "Include my test sessions" is ticked. `#debug` also shows a researcher panel on the test page.
 
 ## Dashboards
-- `results.html` – mainly Link A (has an A/B switch). Headline, auto findings, taps-to-reach-iHeart
-  histogram, funnel, 1st/2nd/3rd tap, spots tried instead of the link (share of participants),
-  tap map with replay, time-to-find strip, common tap paths, participants table, Download CSV
-  (both links, one row per tap with participant columns), Clear data.
-- `results-b.html` – Link B only: outcome split (first try / came back and found it / never found),
-  participant squares, journey flow (sankey), first-tap zone map, per-session timelines,
-  misfire table, taps by video second with the end card shaded, hesitation vs outcome,
-  time in iHeart after the link, participants table with journeys, Link B CSV.
+- **Study size: 9 different participants per link (18 in all).** The dashboards are built for that:
+  one square / row / column per person, counts written as "4 of 9" (no percentages), and a note
+  that a 1–2 person gap between A and B is noise. `Dash.TARGET = 9` in `dash.js` sets the number
+  of planned slots.
+- `dash.js` + `dash.css` – shared by both pages: top bar with Link A / Link B tabs, settings,
+  Clear data, Download CSV (both links, one row per tap with participant columns), polling,
+  session building, the A-vs-B comparison cards (9 outcome squares per link, empty dashed slots
+  for sessions not run yet), "After the link opened iHeart" list, sample data (9 + 9).
+  Outcomes are the same three on both links, same colors everywhere: link on the first tap/try
+  (red), found it later (pink), never found it (gray).
+- `results.html` – Link A, organised by the three research questions: headline + comparison cards,
+  findings; 1) every participant's taps in order (numbered circles by area, ↻ = story looped);
+  2) spot matrix (spots × people, ring = their first tap) and tap map with per-person replay;
+  3) after the link; participants table.
+- `results-b.html` – Link B: headline + comparison cards, findings; 1) per-session timelines
+  (which story was on screen) and an end-card dot plot (link taps and wrong first taps by video
+  second); 2) first-tap zone map with a list of first-tap spots, each with people squares;
+  3) after the link; participants table with journeys.
+- Selecting a person anywhere (square, name, matrix cell, table row, timeline) highlights them on
+  the whole page. Links like `results-b.html#s=HB-1234A` open with that person selected.
 - Both show clearly labeled sample data until Settings has the URL and key. Keep that behavior.
 - No build step and no external JS libraries; plain HTML/CSS/JS, Inter from Google Fonts.
   Visual language: cool gray paper `#f3f4f6`, white panels, iHeart red `#c6002b` reserved for the
-  link / success, category colors defined at the top of each file.
+  link / success, colors defined as CSS variables at the top of `dash.css`.
 
 ## Assets (`assets/`)
 - `story.mp4` (20 s, 1080×1920): 17 s trimmed from a screen recording of the iHeart app with the app
